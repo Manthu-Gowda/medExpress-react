@@ -3,7 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import "./MainLayout.scss";
 import { useEffect, useState } from "react";
 import { Grid } from "antd";
-import NewSideNav from "../NewSidebar/NewSidebar";
+import Sidebar from "../Sidebar/Sidebar";
 import Logo from "../../assets/Logo.png";
 import DummyUser from "../../assets/DummyUser.png";
 import NotificationIcon from "../../assets/icons/navbarIcons/NotificationIcon";
@@ -24,7 +24,7 @@ const MainLayout = () => {
   return (
     <div className={`mainlayout ${isCollapsed ? "collapsed" : ""}`}>
       <div className="mainlayout_left">
-        <NewSideNav isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+        <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       </div>
 
       <div className="mainlayout_right">

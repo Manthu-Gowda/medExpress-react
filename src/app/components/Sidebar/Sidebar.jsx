@@ -1,6 +1,6 @@
 import { cloneElement } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import "./NewSidebar.scss";
+import "./Sidebar.scss";
 import ProfileIcon from "../../assets/icons/navbarIcons/ProfileIcon";
 import SettingsIcon from "../../assets/icons/navbarIcons/SettingsIcon";
 import CardIcon from "../../assets/icons/navbarIcons/CardIcon";
@@ -10,16 +10,21 @@ import LogoutIcon from "../../assets/icons/navbarIcons/LogoutIcon";
 
 const menuItems = [
   { text: "Patients", icon: <PatientsIcon />, path: "/patients" },
-  { text: "Subscription", icon: <CardIcon />, path: "/applications" },
-  { text: "Profile", icon: <ProfileIcon />, path: "/borrowers" },
+  { text: "Subscription", icon: <CardIcon />, path: "/subscription" },
+  { text: "Profile", icon: <ProfileIcon />, path: "/profile" },
   { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
 ];
 
-const NewSidebar = ({ isCollapsed, setIsCollapsed }) => {
+const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
 
   return (
     <aside className={`sidebar1 ${isCollapsed ? "collapsed" : ""}`}>
@@ -50,14 +55,20 @@ const NewSidebar = ({ isCollapsed, setIsCollapsed }) => {
             return (
               <li
                 key={item.text}
-                className={`sidebar1_center_menu_row ${isActive ? "active" : ""}`}
+                className={`sidebar1_center_menu_row ${
+                  isActive ? "active" : ""
+                }`}
               >
                 <button
                   type="button"
-                  className={`sidebar1_center_menu_btn ${isActive ? "is-active" : ""}`}
+                  className={`sidebar1_center_menu_btn ${
+                    isActive ? "is-active" : ""
+                  }`}
                   onClick={() => navigate(item.path)}
                 >
-                  <span className="sidebar1_center_menu_icon">{coloredIcon}</span>
+                  <span className="sidebar1_center_menu_icon">
+                    {coloredIcon}
+                  </span>
 
                   {!isCollapsed && (
                     <span className="sidebar1_center_menu_label">
@@ -72,7 +83,11 @@ const NewSidebar = ({ isCollapsed, setIsCollapsed }) => {
       </nav>
 
       <div className="sidebar1_bottom">
-        <button type="button" className="sidebar1_logout_btn">
+        <button
+          type="button"
+          className="sidebar1_logout_btn"
+          onClick={handleLogout}
+        >
           <span className="sidebar1_logout_text">Logout</span>
           <span className="sidebar1_logout_icon">
             <LogoutIcon />
@@ -83,4 +98,4 @@ const NewSidebar = ({ isCollapsed, setIsCollapsed }) => {
   );
 };
 
-export default NewSidebar;
+export default Sidebar;

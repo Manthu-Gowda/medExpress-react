@@ -8,6 +8,7 @@ const ButtonComponent = ({
   className = "",
   disabled = false,
   variant = "primary",
+  style
 }) => {
   return (
     <button
@@ -15,6 +16,7 @@ const ButtonComponent = ({
       className={`custom-button ${variant} ${className}`}
       onClick={onClick}
       disabled={disabled}
+      style={style}
     >
       {children}
     </button>

@@ -1,16 +1,18 @@
 // src/pages/Auth/Login.jsx
 import { useState } from "react";
-import "./Login.scss";
-import ButtonComponent from "../../../components/ButtonComponent/ButtonComponent";
-import EmailIcon from "../../../assets/icons/InputIcons/EmailIcon";
-import PasswordIcon from "../../../assets/icons/InputIcons/PasswordIcon";
-import PasswordCloseIcon from "../../../assets/icons/InputIcons/PasswordCloseIcon";
-import InputField from "../../../components/InputField/InputField";
-import AuthLayout from "../../../components/AuthLayout/AuthLayout";
+import "./AuthStyles.scss";
+import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
+import EmailIcon from "../../assets/icons/InputIcons/EmailIcon";
+import PasswordIcon from "../../assets/icons/InputIcons/PasswordIcon";
+import PasswordCloseIcon from "../../assets/icons/InputIcons/PasswordCloseIcon";
+import InputField from "../../components/InputField/InputField";
+import AuthLayout from "../../components/AuthLayout/AuthLayout";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   const onChange = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -23,6 +25,7 @@ export default function Login() {
     setErrors(next);
     if (Object.keys(next).length === 0) {
       // TODO: call your API
+      navigate("/patients");
       console.log("submit", form);
     }
   };
@@ -32,17 +35,15 @@ export default function Login() {
       <div className="login-card">
         <h1 className="title">Welcome Back!</h1>
         <p className="subtitle">Please enter your details to continue</p>
-
         <form className="form" onSubmit={handleSubmit} noValidate>
           <InputField
-            title="Email Address"
+            title="Email"
             name="email"
             type="text"
             value={form.email}
             onChange={onChange}
             placeholder="Enter your email"
             required
-            prefix={<EmailIcon />}
             errorText={errors.email}
           />
 
@@ -54,7 +55,6 @@ export default function Login() {
             onChange={onChange}
             placeholder="Enter your password"
             required
-            prefix={<PasswordIcon />}
             errorText={errors.password}
           />
 
@@ -72,7 +72,7 @@ export default function Login() {
 
         <div className="muted">
           Don’t have an Account?{" "}
-          <a className="link" href="/signup">
+          <a className="link" href="/">
             Sign Up
           </a>
         </div>
@@ -87,7 +87,7 @@ export default function Login() {
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
             className="g-icon"
           />
-          Continue with Google
+          Login with Google
         </ButtonComponent>
       </div>
     </AuthLayout>

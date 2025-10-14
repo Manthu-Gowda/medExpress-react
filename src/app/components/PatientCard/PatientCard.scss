@@ -1,0 +1,117 @@
+@use "../../globalStyles" as *; // uses your variables.scss
+
+.pc {
+  background: $primary_white;
+  border: 1px solid $primary_border;
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 1px 2px rgba(2, 6, 23, 0.02);
+
+  // &--selected {
+  //   outline: 3px solid rgba($brand_color, 0.35);
+  //   border-color: $brand_color;
+  // }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  &__title {
+    font-size: 18px;
+    font-weight: 700;
+    color: $primary_text;
+    margin: 0;
+  }
+
+  &__edit {
+    background: #f5f9ff;
+    border: 1px solid $primary_border;
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    &:hover {
+      border-color: $brand_color;
+      background: rgba($brand_color, 0.08);
+    }
+  }
+
+  &__body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 6px 0;
+    border-top: 1px solid $primary_border;
+    border-bottom: 1px solid $primary_border;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    column-gap: 12px;
+    row-gap: 4px;
+    margin: 4px 0;
+
+    @media (max-width: 560px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__label {
+    color: $secondary_text;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  &__value {
+    color: $primary_text;
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding-top: 2px;
+  }
+
+  &__pill {
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid $primary_border;
+    background: #f8fbff;
+    color: $primary_text;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+
+    &:hover {
+      border-color: $brand_color;
+      background: rgba($brand_color, 0.08);
+    }
+
+    &--primary {
+      background: $brand_color;
+      color: #fff;
+      border-color: $brand_color;
+
+      &:hover {
+        opacity: 0.96;
+      }
+    }
+  }
+}

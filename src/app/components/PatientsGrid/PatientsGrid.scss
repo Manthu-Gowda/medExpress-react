@@ -1,0 +1,16 @@
+@use "../../globalStyles" as *;
+
+.patients-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 14px;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+
+  &__item {
+    // keeps the outline shadow from being clipped
+    border-radius: 18px;
+  }
+}

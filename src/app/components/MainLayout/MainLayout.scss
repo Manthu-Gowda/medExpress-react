@@ -2,6 +2,7 @@
 @use "../../globalStyles" as *;
 
 .mainlayout {
+  height: 100vh;
   padding: 10px;
   display: flex;
   gap: 10px;
@@ -15,6 +16,7 @@
   .mainlayout_right {
     flex: 1 1 auto;
     min-width: 0; // prevents overflow when content is wide
+    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -23,16 +25,16 @@
 
 /* Sticky header */
 .mainlayout_header {
-  height: 64px;
+  // height: 64px;
   background: $primary_white;
   border: 1px solid #e6eef8;
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
-  position: sticky;
-  z-index: 10;
+  padding: 5px 14px;
+  // position: sticky;
+  // z-index: 10;
 
   .header_left {
     display: flex;
@@ -133,7 +135,7 @@
 .mainlayout_content {
   flex: 1 1 auto;
   min-height: 0;
-  overflow: auto; // page scrolls here
+  overflow-y: auto; // page scrolls here
   background: $primary_white;
   border: 1px solid #e6eef8;
   border-radius: 16px;

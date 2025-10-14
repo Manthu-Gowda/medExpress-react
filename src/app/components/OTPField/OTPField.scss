@@ -1,0 +1,48 @@
+@use "../../globalStyles" as *;
+
+.otpinput {
+  display: flex;
+  gap: 14px;
+  justify-content: center; // matches your mock
+  margin: 6px 0 6px;
+
+  &__box {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: $primary_text;
+    background: #f7fbff;
+    border-radius: 4px;
+    border: none;
+    border-bottom: 2px solid #0e82fd;
+    box-shadow: 0px 0px 2px 0px #00000040;
+
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s;
+
+    &:focus {
+      border-color: #0e82fd;
+      box-shadow: 0 0 0 4px rgba(#0e82fd, 0.18);
+      background: #ffffff;
+    }
+
+    &::placeholder { color: $secondary_text; }
+  }
+}
+
+/* error state uses your existing .forminput.has-error .input rule;
+   add OTP override so border goes red as well */
+.forminput.has-error .otpinput__box {
+  border-color: red !important;
+  box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.2);
+}
+
+@media (max-width: 420px) {
+  .otpinput__box {
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+  }
+}

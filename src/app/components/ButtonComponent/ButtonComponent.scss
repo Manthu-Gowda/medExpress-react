@@ -3,25 +3,25 @@
   font-size: 16px;
   font-weight: 500;
   border: none;
-  border-radius: 16px;
+  border-radius: 12px;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
-  height: 38.5px;
+  height: 45px;
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 10px;
   width: 100%;
 
   &.main {
     background-color: #0e82fd;
     color: #fff;
     border-radius: 6px;
-    gap: 10px;
-
     &:hover {
       background-color: #0e82fd;
     }
   }
+
   &.primary {
     background-color: #0e82fd;
     color: #fff;
@@ -32,9 +32,9 @@
   }
 
   &.secondary {
-    background-color: #f0f0f0;
-    color: #333;
-    border: 1px solid #ccc;
+    background-color: #ffffff;
+    color: #0e82fd;
+    border: 1px solid #0e82fd;
 
     &:hover {
       background-color: #e0e0e0;

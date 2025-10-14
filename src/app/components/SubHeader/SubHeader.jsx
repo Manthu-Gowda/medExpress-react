@@ -1,6 +1,7 @@
 import BackArrowIcon from "../../assets/icons/pageIcons/BackArrowIcon";
 import PlusIcon from "../../assets/icons/pageIcons/PlusIcon";
 import ButtonComponent from "../ButtonComponent/ButtonComponent";
+import PropTypes from "prop-types";
 import "./SubHeader.scss";
 
 const SubHeader = ({
@@ -50,6 +51,17 @@ const SubHeader = ({
       )}
     </div>
   );
+};
+
+SubHeader.propTypes = {
+  title: PropTypes.string.isRequired,
+  showBack: PropTypes.bool,
+  onBack: PropTypes.func,
+  showRight: PropTypes.bool,
+  buttonText: PropTypes.string,
+  sticky: PropTypes.bool,
+  divider: PropTypes.bool,
+  compact: PropTypes.bool,
 };
 
 export default SubHeader;
