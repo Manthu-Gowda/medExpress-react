@@ -1,5 +1,5 @@
-@import "../../globalStyles/variables.scss";
-@import "../../globalStyles/mixins.scss";
+@use "../../globalStyles" as *;
+@use "../../globalStyles" as *;
 
 .sidebar1 {
   width: 250px;

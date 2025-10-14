@@ -1,7 +1,8 @@
-@import "../../globalStyles/variables.scss";
-@import "../../globalStyles/mixins.scss";
+@use "../../globalStyles" as *;
+@use "../../globalStyles" as *;
 
 .mainlayout {
+  padding: 10px;
   display: flex;
   gap: 10px;
 
