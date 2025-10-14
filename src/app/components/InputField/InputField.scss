@@ -1,0 +1,54 @@
+@import "../../globalStyles/variables.scss";
+@import "../../globalStyles/mixins.scss";
+
+.forminput {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+  width: 100%;
+
+  .input-label {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #111827;
+  }
+
+  .required-asterisk {
+    color: red;
+    margin-left: 2px;
+  }
+
+  .input-container {
+    .input {
+      font-size: 16px;
+      box-shadow: 0px 0px 2px 0px #00000040;
+      color: $secondary_text;
+    }
+  }
+
+  .input-error-text {
+    color: red;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .input-helper-text {
+    color: #666;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  &.has-error {
+    .input {
+      border-color: red !important;
+    }
+  }
+
+  input.ant-input.ant-input-lg.css-dev-only-do-not-override-1vjf2v5 {
+    padding-left: 4px !important;
+    font-weight: 400 !important;
+    // background-color: transparent !important;
+    // color: $grey_text !important;
+  }
+}

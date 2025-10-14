@@ -1,0 +1,87 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+
+.App {
+  font-family: "DM Sans", sans-serif;
+  height: calc(100vh - 20px);
+  overflow-y: hidden;
+  background: #eef2f5;
+  padding: 10px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span {
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  li {
+    list-style-type: none;
+  }
+}
+
+.error {
+  font-size: 12px;
+  color: red;
+}
+
+::-webkit-scrollbar {
+  width: 12px !important;
+  height: 10px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: gray;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background: #eeeeee;
+  cursor: pointer;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.ant-table-body {
+  scrollbar-width: thin !important;
+}
+
+.ant-dropdown-menu,
+.ant-dropdown-menu-root {
+  overflow: none !important;
+}
+
+.ant-dropdown-menu,
+.ant-dropdown-menu-vertical {
+  overflow-y: none !important;
+}
+
+.custom-dropdown-scroll-wrapper {
+  max-height: 240px;
+  overflow-y: auto;
+  background-color: #f1f1f1;
+  padding: 4px 0;
+}
+
+.custom-dropdown .ant-dropdown-menu {
+  overflow: visible !important;
+  max-height: unset !important;
+  background-color: transparent !important;
+}
+
+li.ant-pagination-item.ant-pagination-item {
+  margin-right: 4px !important;
+}

@@ -1,0 +1,198 @@
+@import "../../globalStyles/variables.scss";
+@import "../../globalStyles/mixins.scss";
+
+.sidebar1 {
+  width: 250px;
+  height: calc(100vh - 60px);
+  border: 1px solid #d7f0ff;
+  border-radius: 24px;
+  background-color: $primary_white;
+  padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+
+  &_top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #d7f0ff;
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: $primary_text;
+      margin: 0;
+    }
+
+    .sidebar1_toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      padding: 6px;
+      border-radius: 10px;
+
+      &:hover {
+        background: rgba(14, 130, 253, 0.08);
+      }
+    }
+  }
+
+  &_center {
+    padding-top: 10px;
+    flex: 1 1 auto;
+
+    &_menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      &_row {
+        display: flex;
+        align-items: center;
+        margin: 6px 0;
+      }
+
+      &_btn {
+        height: 48px;
+        padding: 0 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        border: none;
+        background: $primary_white;
+        color: $secondary_text;
+        cursor: pointer;
+        border-radius: 16px;
+        transition: background 0.2s ease, color 0.2s ease;
+        width: 100%;
+        text-align: left;
+
+        &:hover {
+          background: rgba(14, 130, 253, 0.08);
+        }
+
+        &.is-active {
+          background: $brand_color;
+          color: $primary_white;
+
+          &:hover {
+            background: $brand_color;
+          }
+        }
+      }
+
+      &_icon {
+        display: inline-flex;
+        width: 24px;
+        height: 24px;
+
+        // If your SVGs use currentColor, this will flip icon color with text
+        color: inherit;
+
+        // If SVG paths have inline fills, try to override when possible
+        svg,
+        svg * {
+          // Many icon sets respect currentColor if no hard-coded fill is set
+          color: inherit;
+          stroke: currentColor;
+        }
+      }
+
+      &_label {
+        font-weight: 500;
+        font-size: 16px;
+        letter-spacing: 0.2px;
+      }
+    }
+  }
+
+  &_bottom {
+    margin-top: auto; // pins to bottom
+    padding-top: 12px;
+    border-top: 1px solid #d7f0ff;
+
+    .sidebar1_logout_btn {
+      width: 100%;
+      height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #ff453626;
+      color: #ff4d4f;
+      border: 1px solid #d7f0ff;
+      border-radius: 14px;
+      padding: 0 14px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 77, 79, 0.08);
+      }
+
+      .sidebar1_logout_text {
+        white-space: nowrap;
+        font-weight: 500;
+        font-size: 16px;
+      }
+      .sidebar1_logout_icon {
+        display: inline-flex;
+      }
+    }
+  }
+
+  // Collapsed state — icons only
+  &.collapsed {
+    width: 50px;
+    padding: 20px 14px;
+
+    .sidebar1_top {
+      justify-content: center;
+      h1 {
+        display: none;
+      }
+    }
+
+    .sidebar1_center {
+      &_menu {
+        &_btn {
+          justify-content: center;
+          padding: 0;
+        }
+      }
+    }
+
+    .sidebar1_bottom {
+      .sidebar1_logout_text {
+        display: none;
+      }
+      .sidebar1_logout_btn {
+        justify-content: center;
+        padding: 0 10px;
+      }
+    }
+  }
+}
+
+/* Simple responsiveness: shrink to icons-only on very small widths */
+@media (max-width: 640px) {
+  .sidebar1 {
+    width: 76px;
+
+    .sidebar1_top h1 {
+      display: none;
+    }
+
+    .sidebar1_center_menu_btn {
+      justify-content: center;
+      padding: 0;
+    }
+
+    .sidebar1_bottom .sidebar1_logout_text {
+      display: none;
+    }
+  }
+}
