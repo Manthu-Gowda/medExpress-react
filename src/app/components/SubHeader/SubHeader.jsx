@@ -35,9 +35,10 @@ const SubHeader = ({
               aria-label="Go back"
               onClick={onBack}
             >
-              <BackArrowIcon /> {title}
+              <BackArrowIcon />
             </button>
           )}
+          <h2>{title}</h2>
         </div>
       </div>
 

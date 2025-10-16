@@ -4,6 +4,7 @@ import { Input } from "antd";
 
 const InputField = ({
   title,
+  helperTitle = "",
   type,
   value,
   onChange,
@@ -26,6 +27,7 @@ const InputField = ({
         <span className="input-label">
           {title}
           {required && <span className="required-asterisk"> *</span>}
+          <small className="helperTitle">{helperTitle}</small>
         </span>
       )}
 

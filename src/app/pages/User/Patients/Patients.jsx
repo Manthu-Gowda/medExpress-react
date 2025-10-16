@@ -62,12 +62,16 @@ const Patients = () => {
   const [selectedId, setSelectedId] = useState("2");
   const data = useMemo(() => mock, []);
 
+  const handleAddPatients = () => {
+    navigate("/add-patients");
+  };
+
   return (
     <div className="patients">
       <SubHeader
         title="Patients"
-        showBack={true}
-        onClick={() => navigate(-1)}
+        showBack={false}
+        onClick={handleAddPatients}
         showRight={true}
         buttonText="Add New Patient"
       />

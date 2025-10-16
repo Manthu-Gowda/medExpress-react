@@ -10,6 +10,7 @@ import Verification from "../pages/Auth/verification";
 import Subscription from "../pages/User/Subscription/Subscription";
 import Profile from "../pages/User/Profile/Profile";
 import Settings from "../pages/User/Settings/Settings";
+import AddOrEditPatients from "../pages/User/AddOrEditPatients/AddOrEditPatients";
 
 const AppRoutes = () => (
   <Routes>
@@ -21,10 +22,10 @@ const AppRoutes = () => (
       }
     >
       <Route path="/patients" element={<Patients />} />
+      <Route path="/add-patients" element={<AddOrEditPatients />} />
       <Route path="/subscription" element={<Subscription />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
-
     </Route>
   </Routes>
 );

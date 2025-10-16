@@ -1,0 +1,98 @@
+@use "../../globalStyles" as *;
+
+// Inherit the same structure as InputField.scss (.forminput, .input-label, etc.)
+.filedropzone {
+  background: $primary_white;
+  border: 2px dashed #dbe5f2;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+
+  &.is-drag {
+    border-color: $secondary_text;
+    border: 2px dashed #dbe5f2;
+    &:before { border-color: $primary_white; }
+  }
+
+  &.is-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .dz-inner {
+    text-align: center;
+    user-select: none;
+  }
+
+  .dz-icon {
+    display: block;
+    margin: 0 auto 10px;
+    color: #9aa8bd;
+  }
+
+  .dz-text {
+    margin: 0;
+    font-size: 15px;
+    color: #8b99ae; // similar to the placeholder in your Input
+    font-weight: 600;
+  }
+
+  .dz-subtext {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #70839f;
+  }
+}
+
+.dz-files {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .dz-file {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fbff;
+    border: 1px solid #e6eef8;
+    border-radius: 10px;
+    padding: 8px 12px;
+
+    .dz-file-name {
+      flex: 1 1 auto;
+      color: #111827;
+      font-size: 14px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .dz-file-size {
+      color: #70839f;
+      font-size: 12px;
+    }
+    .dz-remove {
+      border: none;
+      background: transparent;
+      font-size: 18px;
+      line-height: 1;
+      padding: 0 4px;
+      color: #9aa8bd;
+      cursor: pointer;
+      &:hover { color: #ff4d4f; }
+    }
+  }
+}
+
+/* Error state keeps parity with .forminput.has-error from InputField.scss */
+.forminput.has-error .filedropzone {
+  border-color: red !important;
+  &:before { border-color: red !important; }
+}

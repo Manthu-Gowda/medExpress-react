@@ -1,0 +1,42 @@
+@use "../../globalStyles" as *;
+
+// reuse the same .forminput structure from InputField.scss
+.forminput {
+  .select-input.ant-select {
+    width: 100%;
+
+    .ant-select-selector {
+      height: 45px !important;
+      border-radius: 8px !important;
+      box-shadow: 0px 0px 2px 0px #00000040;
+      border: 1px solid #e6eef8 !important;
+      display: flex;
+      align-items: center;
+      color: $secondary_text;
+      font-size: 16px;
+      background-color: $primary_white;
+      transition: all 0.2s ease;
+    }
+
+    .ant-select-selection-placeholder {
+      color: #8b99ae !important; // same as input placeholder color
+    }
+
+    &.ant-select-focused .ant-select-selector {
+      border-color: $primary_border;
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+    }
+
+    &.ant-select-disabled .ant-select-selector {
+      background-color: #f5f5f5;
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
+  }
+
+  &.has-error {
+    .ant-select-selector {
+      border-color: red !important;
+    }
+  }
+}
