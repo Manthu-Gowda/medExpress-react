@@ -1,0 +1,99 @@
+// Use your existing palette
+$brand_color: #0e82fd;
+$primary_white: #ffffff;
+$primary_border: #e6eef8;
+$primary_text: #012047;
+$secondary_text: #919cb4;
+
+.appModal {
+  // remove default padding so we can style header/body/footer
+  .ant-modal-content {
+    padding: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 14px 40px rgba(1, 32, 71, 0.18);
+  }
+
+  .ant-modal-body {
+    padding: 0; // keep full control
+    background: $primary_white;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    background: $primary_white;
+    border-bottom: 1px solid $primary_border;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: $primary_text;
+  }
+
+  &__close {
+    border: 1px solid $primary_border;
+    background: #f8fafc;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    color: $secondary_text;
+    line-height: 0;
+
+    &:hover {
+      border-color: $brand_color;
+      color: $brand_color;
+    }
+  }
+
+  &__body {
+    padding: 14px 18px 0 18px; // top spacing like the screenshot
+  }
+
+  &__footer {
+    display: flex;
+    gap: 12px;
+    padding: 14px 18px 18px 18px;
+    background: $primary_white;
+    border-top: 1px solid $primary_border;
+
+    &.is-left   { justify-content: flex-start; }
+    &.is-center { justify-content: center; }
+    &.is-right  { justify-content: flex-end; }
+  }
+}
+
+/* Optional: list item style that matches the grey rounded rows in your screenshot */
+.patientItem {
+  border: 1px solid $primary_border;
+  background: #f6f9fc;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  & + .patientItem {
+    margin-top: 10px;
+  }
+
+  &__text {
+    strong {
+      display: block;
+      color: $primary_text;
+      font-weight: 700;
+    }
+    small {
+      color: $secondary_text;
+      display: block;
+      margin-top: 2px;
+    }
+  }
+}

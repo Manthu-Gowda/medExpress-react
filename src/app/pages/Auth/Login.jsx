@@ -81,7 +81,7 @@ export default function Login() {
           <span>or</span>
         </div>
 
-        <ButtonComponent variant="transparent">
+        <ButtonComponent variant="transparent" style={{width: "100%"}}>
           <img
             alt="Google"
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"

@@ -11,12 +11,12 @@
   justify-content: center;
   align-items: center;
   gap: 10px;
-  width: 100%;
 
   &.main {
     background-color: #0e82fd;
     color: #fff;
     border-radius: 6px;
+
     &:hover {
       background-color: #0e82fd;
     }
@@ -50,10 +50,20 @@
     }
   }
 
+  &.light {
+    background-color: #0E82FD1A;
+    color: #0E82FD;
+
+    &:hover {
+      background-color: #0E82FD1A;
+    }
+  }
+
   &.black {
     background-color: #000;
     color: #fff;
     border-radius: 50px;
+
     &:hover {
       background-color: #010101;
     }
@@ -63,6 +73,7 @@
     background-color: transparent;
     color: #000;
     border: 1px solid #111827;
+
     &:hover {
       background-color: transparent;
     }
