@@ -2,34 +2,80 @@
 import { useState } from "react";
 import "./AuthStyles.scss";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
-import EmailIcon from "../../assets/icons/InputIcons/EmailIcon";
 import InputField from "../../components/InputField/InputField";
 import AuthLayout from "../../components/AuthLayout/AuthLayout";
+import { useNavigate } from "react-router-dom";
+import { FORGOT_PASSWORD } from "../../utils/apiPath";
+import { postApi } from "../../utils/apiService";
+import { errorToast, successToast } from "../../services/ToastHelper";
+import Loader from "../../components/Loader/Loader";
+
+const initialValues = {
+  email: "",
+};
 
 export default function Forgot() {
-  const [form, setForm] = useState({ email: "" });
+  const [form, setForm] = useState(initialValues);
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const onChange = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const next = {};
-    if (!form.email.trim()) next.email = "Email is required";
-    setErrors(next);
-    if (Object.keys(next).length === 0) {
-      // TODO: call your API
-      console.log("submit", form);
+  const validateFields = () => {
+    let errObj = { ...initialValues };
+
+    if (!form.email) {
+      errObj.email = "This field is required";
+    } else if (/\s/.test(form.email)) {
+      errObj.email = "Email should not contain spaces";
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email)) {
+      errObj.email = "Please enter a valid email address";
+    } else {
+      errObj.email = "";
+    }
+
+    setErrors((prev) => ({ ...prev, ...errObj }));
+    const data = Object.values(errObj).every((x) => x === "" || x === null);
+    return data;
+  };
+
+  const handleSubmit = async () => {
+    if (validateFields()) {
+      setIsLoading(true);
+      const payload = {
+        email: form.email,
+      };
+      const { statusCode, data, message } = await postApi(
+        FORGOT_PASSWORD,
+        payload
+      );
+      if (statusCode === 200) {
+        sessionStorage.setItem("pendingEmail", form.email);
+        setIsLoading(false);
+        successToast(message);
+        navigate("/reset", { state: { email: form.email } });
+      } else {
+        setIsLoading(false);
+        errorToast(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Something went wrong. Please try again."
+        );
+      }
     }
   };
 
   return (
     <AuthLayout>
+      {isLoading && <Loader />}
       <div className="login-card">
         <h1 className="title">Forgot Password?</h1>
-        <p className="subtitle">No worries, we'll send your reset instructions to your email</p>
-        <form className="form" onSubmit={handleSubmit} noValidate>
+        <p className="subtitle">
+          No worries, we'll send your reset instructions to your email
+        </p>
+        <div className="form">
           <InputField
             title="Email"
             name="email"
@@ -41,14 +87,18 @@ export default function Forgot() {
             errorText={errors.email}
           />
 
-          <ButtonComponent type="submit" variant="primary">
+          <ButtonComponent
+            type="submit"
+            variant="primary"
+            onClick={handleSubmit}
+          >
             Next
           </ButtonComponent>
-        </form>
+        </div>
 
         <div className="muted">
           Back to{" "}
-          <a className="link" href="/signup">
+          <a className="link" href="/">
             Sign in
           </a>
         </div>

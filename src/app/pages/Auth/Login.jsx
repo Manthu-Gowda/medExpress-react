@@ -42,6 +42,8 @@ export default function Login() {
       errObj.email = "This field is required";
     } else if (/\s/.test(login.email)) {
       errObj.email = "Email should not contain spaces";
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(login.email)) {
+      errObj.email = "Please enter a valid email address";
     } else {
       errObj.email = "";
     }
@@ -128,6 +130,7 @@ export default function Login() {
             type="submit"
             variant="primary"
             onClick={handleSubmit}
+                    
           >
             Sign In
           </ButtonComponent>
@@ -135,7 +138,7 @@ export default function Login() {
 
         <div className="muted">
           Don’t have an Account?{" "}
-          <a className="link" href="/">
+          <a className="link" href="/signup">
             Sign Up
           </a>
         </div>

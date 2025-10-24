@@ -1,35 +1,99 @@
 // src/pages/Auth/Login.jsx
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./AuthStyles.scss";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import AuthLayout from "../../components/AuthLayout/AuthLayout";
 import OTPField from "../../components/OTPField/OTPField";
+import { useLocation, useNavigate } from "react-router-dom";
+import Loader from "../../components/Loader/Loader";
+import { RESEND_REGISTER_OTP, VERIFY_REGISTER_OTP } from "../../utils/apiPath";
+import { postApi } from "../../utils/apiService";
+import { errorToast, successToast } from "../../services/ToastHelper";
 
 export default function Verification() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const emailFromState = location?.state?.email || "";
+  const cachedEmail =
+    typeof window !== "undefined" ? sessionStorage.getItem("pendingEmail") : "";
+  const email = useMemo(
+    () => emailFromState || cachedEmail || "",
+    [emailFromState, cachedEmail]
+  );
   const [form, setForm] = useState({ otp: "" });
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
-  const handleOTPChange = (e) =>
-    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+  useEffect(() => {
+    if (!email) {
+      errorToast("Missing email. Please register again.");
+      navigate("/signup"); // or back to signup
+    }
+  }, [email, navigate]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleOTPChange = (e) => {
+    const { name, value } = e.target;
+    // allow only digits, max 4
+    const nextVal = value.replace(/\D/g, "").slice(0, 4);
+
+    setForm((prev) => ({ ...prev, [name]: nextVal }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const validateOTP = () => {
     const next = {};
-    if (form.otp.length !== 4) next.otp = "Please enter the 4-digit code";
+    if (!form.otp) next.otp = "This field is required";
+    else if (!/^\d{4}$/.test(form.otp))
+      next.otp = "Please enter the 4-digit code";
     setErrors(next);
-    if (Object.keys(next).length === 0) {
-      console.log("Verify OTP:", form.otp);
+    return Object.keys(next).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (validateOTP()) {
+      setIsLoading(true);
+      const payload = { email, otp: form.otp };
+      const { statusCode, data, message } = await postApi(
+        VERIFY_REGISTER_OTP,
+        payload
+      );
+      if (statusCode === 200) {
+        successToast(message || "OTP verified successfully!");
+        localStorage.removeItem("pendingEmail");
+        setIsLoading(false);
+        navigate("/");
+      } else {
+        setIsLoading(false);
+        errorToast(data?.message || "Invalid OTP. Please try again.");
+      }
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email) return;
+    setIsResending(true);
+    const { statusCode, data, message } = await postApi(RESEND_REGISTER_OTP, {
+      email,
+    });
+    if (statusCode === 200) {
+      setIsResending(false);
+      successToast(message || "OTP resent to your email.");
+    } else {
+      setIsResending(false);
+      errorToast(data?.message || "Unable to resend OTP. Try again later.");
     }
   };
 
   return (
     <AuthLayout>
+      {isLoading && <Loader />}
       <div className="login-card">
         <h1 className="title">OTP Verification</h1>
         <p className="subtitle">
           Please enter the 4-digit code sent to your email
         </p>
-        <form className="form" onSubmit={handleSubmit} noValidate>
+        <div className="form">
           <OTPField
             title=""
             name="otp"
@@ -40,10 +104,14 @@ export default function Verification() {
             errorText={errors.otp}
             helperText=""
           />
-          <ButtonComponent type="submit" variant="primary">
+          <ButtonComponent
+            type="submit"
+            variant="primary"
+            onClick={handleSubmit}
+          >
             Verify
           </ButtonComponent>
-        </form>
+        </div>
 
         <div className="muted">
           Haven't received the code?{" "}
@@ -58,7 +126,7 @@ export default function Verification() {
               color: "#0e82fd",
               cursor: "pointer",
             }}
-            onClick={() => console.log("Resend OTP")}
+            onClick={handleResend}
           >
             Resend It
           </button>

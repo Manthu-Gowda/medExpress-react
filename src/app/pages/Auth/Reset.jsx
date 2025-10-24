@@ -1,27 +1,96 @@
 // src/pages/Auth/Login.jsx
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./AuthStyles.scss";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import InputField from "../../components/InputField/InputField";
 import AuthLayout from "../../components/AuthLayout/AuthLayout";
+import { RESET_PASSWORD } from "../../utils/apiPath";
+import { postApi } from "../../utils/apiService";
+import { errorToast, successToast } from "../../services/ToastHelper";
+import { useLocation, useNavigate } from "react-router-dom";
+
+const initialValues = {
+  password: "",
+  confirmPassword: "",
+};
 
 export default function Reset() {
-  const [form, setForm] = useState({ password: "", confirmPassword: "" });
+    const location = useLocation();
+  const navigate = useNavigate();
+  const emailFromState = location?.state?.email || "";
+  const cachedEmail =
+    typeof window !== "undefined" ? sessionStorage.getItem("pendingEmail") : "";
+  const email = useMemo(
+    () => emailFromState || cachedEmail || "",
+    [emailFromState, cachedEmail]
+  );
+  const [form, setForm] = useState(initialValues);
   const [errors, setErrors] = useState({});
+
+    useEffect(() => {
+      if (!email) {
+        errorToast("Missing email. Please register again.");
+        navigate("/forgot"); // or back to signup
+      }
+    }, [email, navigate]);
+  
 
   const onChange = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const next = {};
-    if (!form.password.trim()) next.password = "Password is required";
-    if (!form.confirmPassword.trim())
-      next.confirmPassword = "Confirm Password is required";
-    setErrors(next);
-    if (Object.keys(next).length === 0) {
-      // TODO: call your API
-      console.log("submit", form);
+  const validateFields = () => {
+    let errObj = { ...initialValues };
+
+    if (!form.password) {
+      errObj.password = "This field is required";
+    } else if (/\s/.test(form.password)) {
+      errObj.password = "Password should not contain spaces";
+    } else if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(form.password)
+    ) {
+      errObj.password =
+        "Password must be 8+ characters, with uppercase, lowercase, number, and special character.";
+    } else {
+      errObj.password = "";
+    }
+
+    if (!form.confirmPassword) {
+      errObj.confirmPassword = "This field is required";
+    } else if (form.password !== form.confirmPassword) {
+      errObj.confirmPassword = "Passwords do not match";
+    } else {
+      errObj.confirmPassword = "";
+    }
+
+    setErrors((prev) => ({ ...prev, ...errObj }));
+    const data = Object.values(errObj).every((x) => x === "" || x === null);
+    return data;
+  };
+
+  const handleSubmit = async () => {
+    if (validateFields()) {
+      setIsLoading(true);
+      const payload = {
+        email,
+        token: "",
+        password: form.password,
+      };
+      const { statusCode, data, message } = await postApi(
+        RESET_PASSWORD,
+        payload
+      );
+      if (statusCode === 200) {
+        setIsLoading(false);
+        successToast(message);
+        navigate("/");
+      } else {
+        setIsLoading(false);
+        errorToast(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Something went wrong. Please try again."
+        );
+      }
     }
   };
 
