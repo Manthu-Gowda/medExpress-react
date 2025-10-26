@@ -65,7 +65,7 @@ export default function Verification() {
         navigate("/");
       } else {
         setIsLoading(false);
-        errorToast(data?.message || "Invalid OTP. Please try again.");
+        errorToast(message || "Invalid OTP. Please try again.");
       }
     }
   };

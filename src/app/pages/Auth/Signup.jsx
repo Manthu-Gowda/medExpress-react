@@ -94,11 +94,7 @@ export default function SignUp() {
         navigate("/verification", { state: { email: login.email } });
       } else {
         setIsLoading(false);
-        errorToast(
-          err?.response?.data?.message ||
-            err?.message ||
-            "Something went wrong. Please try again."
-        );
+        errorToast(message);
       }
     }
   };

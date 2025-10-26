@@ -81,11 +81,7 @@ export default function Login() {
         navigate("/patients");
       } else {
         setIsLoading(false);
-        errorToast(
-          err?.response?.data?.message ||
-            err?.message ||
-            "Something went wrong. Please try again."
-        );
+        errorToast(message);
       }
     }
   };
