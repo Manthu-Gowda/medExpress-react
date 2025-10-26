@@ -1,10 +1,8 @@
+// SelectInput.jsx
 import React from "react";
 import { Select } from "antd";
 import "./SelectInput.scss";
 
-/**
- * Reusable Select input matching InputField styles
- */
 const SelectInput = ({
   title,
   name,
@@ -16,11 +14,19 @@ const SelectInput = ({
   disabled = false,
   errorText = "",
   helperText = "",
-  mode, // e.g. "multiple" or "tags"
+  mode,
   size = "large",
   allowClear = true,
   showSearch = false,
   optionFilterProp = "label",
+
+  // NEW pass-throughs for remote search / UX
+  onSearch,
+  filterOption,
+  loading = false,
+  notFoundContent,
+  onFocus,
+  onPopupScroll,
 }) => {
   const hasError = Boolean(errorText);
 
@@ -48,6 +54,13 @@ const SelectInput = ({
           showSearch={showSearch}
           optionFilterProp={optionFilterProp}
           popupMatchSelectWidth={false}
+          // NEW
+          onSearch={onSearch}
+          filterOption={filterOption}
+          loading={loading}
+          notFoundContent={notFoundContent}
+          onFocus={onFocus}
+          onPopupScroll={onPopupScroll}
         />
       </div>
 

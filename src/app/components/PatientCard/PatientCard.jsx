@@ -1,9 +1,19 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import PropTypes from "prop-types";
+import { Modal, Image } from "antd";
 import "./PatientCard.scss";
 import EditIcon from "../../assets/icons/EditIcon";
 import EyeIcon from "../../assets/icons/EyeIcon";
 import ButtonComponent from "../ButtonComponent/ButtonComponent";
+
+const BASE_URL = "https://vibhu-solutions.s3.ap-south-1.amazonaws.com/";
+const toAbsolute = (url) => {
+  if (!url) return "";
+  const s = String(url).trim();
+  if (/^https?:\/\//i.test(s) || s.startsWith("data:")) return s; // already absolute or data URL
+  const key = s.replace(/^\/*/, ""); // strip leading slashes
+  return `${BASE_URL}${encodeURI(key)}`; // join + encode
+};
 
 const Row = ({ label, value }) => (
   <div className="pc__row">
@@ -12,6 +22,44 @@ const Row = ({ label, value }) => (
   </div>
 );
 
+const joinAddress = (...parts) =>
+  parts
+    .map((p) => (typeof p === "string" ? p.trim() : p))
+    .filter((p) => p && p.length > 0)
+    .join(", ");
+
+/** ---- helpers ---- */
+const getExt = (url = "") => {
+  try {
+    const u = String(url).split("?")[0].split("#")[0]; // drop query/hash
+    return (u.substring(u.lastIndexOf(".") + 1) || "").toLowerCase();
+  } catch {
+    return "";
+  }
+};
+
+const isImageUrl = (url) => {
+  if (!url) return false;
+  if (String(url).startsWith("data:image/")) return true; // data-URL
+  const ext = getExt(url);
+  return ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"].includes(ext);
+};
+
+const isPdfUrl = (url) => {
+  if (!url) return false;
+  if (String(url).startsWith("data:application/pdf")) return true; // data-URL
+  return getExt(url) === "pdf";
+};
+
+const toArray = (v) => (Array.isArray(v) ? v : v ? [v] : []);
+
+const stop = (fn) => (e) => {
+  if (e?.preventDefault) e.preventDefault();
+  if (e?.stopPropagation) e.stopPropagation();
+  fn?.();
+};
+
+/** ---- component ---- */
 const PatientCard = ({
   data,
   onEdit,
@@ -22,71 +70,229 @@ const PatientCard = ({
   className = "",
 }) => {
   const {
-    fullName,
-    phone,
+    name,
+    phoneNumber,
     email,
-    dob,
-    visaType,
-    visaExpDate,
+    dateOfBirth,
+    visaTypeName,
+    visaExpiryDate,
     usaLastEntryDate,
-    addressLine,
+    address1,
+    address2,
+    cityName,
+    stateName,
+    countryName,
+
+    // links (string | string[])
+    passport,
+    visa,
+    prescriptions,
   } = data || {};
 
+  const addressLine = joinAddress(
+    address1,
+    address2,
+    cityName,
+    stateName,
+    countryName
+  );
+
+  // Modal state
+  const [imgModalOpen, setImgModalOpen] = useState(false);
+  const [imgList, setImgList] = useState([]); // array of image URLs
+  const [imgStartIndex, setImgStartIndex] = useState(0);
+  const [pdfList, setPdfList] = useState([]);
+
+  const openNewTab = (url) => window.open(url, "_blank", "noopener,noreferrer");
+
+  // Build a preview for images (and collect pdfs optionally)
+  const openPreview = (images = [], pdfs = []) => {
+    if (images.length) {
+      setImgList(images);
+      setPdfList(pdfs);
+      setImgStartIndex(0);
+      setImgModalOpen(true);
+    } else if (pdfs.length) {
+      // If only PDFs, open each in new tab. You can change to just open the first.
+      pdfs.forEach((p) => openNewTab(p));
+    }
+  };
+
+  // Default handlers (used only if no onVisa/onPassport/onPrescriptions provided)
+  const handleOpenPassport = () => {
+    if (onPassport) return onPassport(data);
+
+    const items = toArray(passport).map(toAbsolute);
+
+    const images = items.filter(isImageUrl);
+    const pdfs = items.filter(isPdfUrl);
+    const others = items.filter((u) => !isImageUrl(u) && !isPdfUrl(u));
+
+    if (images.length) {
+      openPreview(images, pdfs);
+    } else if (pdfs.length) {
+      pdfs.forEach((p) => openNewTab(p));
+    } else if (others.length) {
+      others.forEach((o) => openNewTab(o));
+    }
+  };
+
+  const handleOpenVisa = () => {
+    if (onVisa) return onVisa(data); // <- if parent provided, use that
+    // else run local preview logic below
+    const items = toArray(visa).map(toAbsolute);
+    const images = items.filter(isImageUrl);
+    const pdfs = items.filter(isPdfUrl);
+    const others = items.filter((u) => !isImageUrl(u) && !isPdfUrl(u));
+
+    if (images.length) {
+      openPreview(images, pdfs);
+    } else if (pdfs.length) {
+      pdfs.forEach((p) => openNewTab(p));
+    } else if (others.length) {
+      others.forEach((o) => openNewTab(o));
+    }
+  };
+
+  const handleOpenPrescriptions = () => {
+    if (onPrescriptions) return onPrescriptions(data);
+
+    const items = toArray(prescriptions).map(toAbsolute);
+
+    const images = items.filter(isImageUrl);
+    const pdfs = items.filter(isPdfUrl);
+    const others = items.filter((u) => !isImageUrl(u) && !isPdfUrl(u));
+
+    if (images.length) openPreview(images, pdfs);
+    if (pdfs.length && !images.length) pdfs.forEach((p) => openNewTab(p));
+    if (others.length && !images.length) others.forEach((o) => openNewTab(o));
+  };
+
   return (
-    <article
-      className={["pc", isSelected ? "pc--selected" : "", className]
-        .join(" ")
-        .trim()}
-    >
-      <header className="pc__header">
-        <h3 className="pc__title">{fullName}</h3>
-        <button
-          type="button"
-          className="pc__edit"
-          aria-label={`Edit ${fullName}`}
-          onClick={onEdit}
-        >
-          <EditIcon />
-        </button>
-      </header>
+    <>
+      <article
+        className={["pc", isSelected ? "pc--selected" : "", className]
+          .join(" ")
+          .trim()}
+      >
+        <header className="pc__header">
+          <h3 className="pc__title">{name}</h3>
+          <button
+            type="button"
+            className="pc__edit"
+            aria-label={`Edit ${name}`}
+            onClick={onEdit}
+          >
+            <EditIcon />
+          </button>
+        </header>
 
-      <div className="pc__body">
-        <Row label="Ph No:" value={phone} />
-        <Row label="E Mail:" value={email} />
-        <Row label="DOB:" value={dob} />
-        <Row label="Visa Type:" value={visaType} />
-        <Row label="Visa Exp Date:" value={visaExpDate} />
-        <Row label="USA Last Entry Date:" value={usaLastEntryDate} />
-        <Row label="Location:" value={addressLine} />
-      </div>
+        <div className="pc__body">
+          <Row label="Ph No:" value={phoneNumber} />
+          <Row label="E Mail:" value={email} />
+          <Row label="DOB:" value={dateOfBirth} />
+          <Row label="Visa Type:" value={visaTypeName} />
+          <Row label="Visa Exp Date:" value={visaExpiryDate} />
+          <Row label="USA Last Entry Date:" value={usaLastEntryDate} />
+          <Row label="Location:" value={addressLine} />
+        </div>
 
-      <footer className="pc__footer">
-        <ButtonComponent variant="secondary" onClick={onVisa}>
-          <EyeIcon /> <span>Visa</span>
-        </ButtonComponent>
-        <ButtonComponent variant="secondary" onClick={onPassport}>
-          <EyeIcon /> <span>Passport</span>
-        </ButtonComponent>
-        <ButtonComponent onClick={onPrescriptions}>
-          <EyeIcon fillColor="#FFFFFF" /> <span>Prescriptions</span>
-        </ButtonComponent>
-      </footer>
-    </article>
+        <footer className="pc__footer">
+          <ButtonComponent variant="secondary" onClick={stop(handleOpenVisa)}>
+            <EyeIcon /> <span>Visa</span>
+          </ButtonComponent>
+
+          <ButtonComponent
+            variant="secondary"
+            onClick={stop(handleOpenPassport)}
+          >
+            <EyeIcon /> <span>Passport</span>
+          </ButtonComponent>
+
+          <ButtonComponent onClick={stop(handleOpenPrescriptions)}>
+            <EyeIcon fillColor="#FFFFFF" /> <span>Prescriptions</span>
+          </ButtonComponent>
+        </footer>
+      </article>
+
+      {/* Image Lightbox + optional PDFs list */}
+      <Modal
+        open={imgModalOpen}
+        onCancel={() => setImgModalOpen(false)}
+        footer={null}
+        width={900}
+        centered
+        destroyOnHidden
+        title="Document Preview"
+      >
+        {imgList.length > 0 && (
+          <Image.PreviewGroup
+            preview={{
+              visible: true,
+              current: imgStartIndex,
+              onVisibleChange: (vis) => !vis && setImgModalOpen(false),
+            }}
+          >
+            {/* Render thumbnails (click to open preview group) */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                gap: 12,
+              }}
+            >
+              {imgList.map((src, idx) => (
+                <Image
+                  key={src + idx}
+                  src={src}
+                  alt={`doc-${idx + 1}`}
+                  height={140}
+                  style={{
+                    objectFit: "cover",
+                    borderRadius: 8,
+                    border: "1px solid #eee",
+                  }}
+                  onClick={() => setImgStartIndex(idx)}
+                />
+              ))}
+            </div>
+          </Image.PreviewGroup>
+        )}
+
+        {pdfList.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <div style={{ fontWeight: 600, marginBottom: 8 }}>PDF files</div>
+            <ul style={{ paddingLeft: 18, margin: 0 }}>
+              {pdfList.map((p, i) => (
+                <li key={p + i} style={{ marginBottom: 6 }}>
+                  <a
+                    href={toAbsolute(p)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      window.open(
+                        toAbsolute(p),
+                        "_blank",
+                        "noopener,noreferrer"
+                      );
+                    }}
+                  >
+                    Open PDF {i + 1}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </Modal>
+    </>
   );
 };
 
 PatientCard.propTypes = {
-  data: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    fullName: PropTypes.string,
-    phone: PropTypes.string,
-    email: PropTypes.string,
-    dob: PropTypes.string,
-    visaType: PropTypes.string,
-    visaExpDate: PropTypes.string,
-    usaLastEntryDate: PropTypes.string,
-    addressLine: PropTypes.string,
-  }).isRequired,
+  data: PropTypes.object,
   onEdit: PropTypes.func,
   onVisa: PropTypes.func,
   onPassport: PropTypes.func,

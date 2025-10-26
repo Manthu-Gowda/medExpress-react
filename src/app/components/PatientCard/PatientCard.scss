@@ -80,11 +80,21 @@
   }
 
   &__footer {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
     padding-top: 2px;
   }
+
+  // &__footer :where(button, .button, .btn) {
+  //   width: 100%;
+  //   min-width: 0;
+  //   /* avoid huge horizontal padding that forces overflow */
+  //   padding-inline: clamp(10px, 2vw, 14px);
+  //   /* let icon+text wrap if absolutely needed instead of overflowing */
+  //   white-space: normal;
+  // }
 
   &__pill {
     height: 34px;

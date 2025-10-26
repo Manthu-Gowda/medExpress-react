@@ -4,7 +4,7 @@
 .forminput {
   .select-input.ant-select {
     width: 100%;
-
+    height: 45px !important;
     .ant-select-selector {
       height: 45px !important;
       border-radius: 8px !important;
@@ -35,7 +35,7 @@
   }
 
   &.has-error {
-    .ant-select-selector {
+    .select-input.ant-select .ant-select-selector {
       border-color: red !important;
     }
   }

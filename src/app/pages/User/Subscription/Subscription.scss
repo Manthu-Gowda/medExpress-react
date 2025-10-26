@@ -2,190 +2,230 @@
 
 // Layout
 .subscription {
-    .subscription_sec {
-        margin-top: 10px;
-        background: $primary_white;
-        border: 1px solid $primary_border;
-        border-radius: 16px;
-        padding: 16px;
-    }
+  .subscription_sec {
+    margin-top: 10px;
+    background: $primary_white;
+    border: 1px solid $primary_border;
+    border-radius: 16px;
+    padding: 16px;
+  }
 }
 
 /* -----------------------
    Plan Card
 ------------------------ */
 .planCard {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 16px;
-    background: $brand_color;
-    border-radius: 12px;
-    padding: 18px 16px;
-    color: $primary_white;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  background: $brand_color;
+  border-radius: 12px;
+  padding: 18px 16px;
+  color: $primary_white;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 
-    &__left {
-        min-width: 0;
-    }
+  &__left {
+    min-width: 0;
+  }
 
-    &__badgeRow {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 10px;
-    }
+  &__badgeRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
 
-    &__badge {
-        background: #e9f2ff !important;
-        color: $brand_color !important;
-        border: none !important;
-        border-radius: 8px !important;
-        font-weight: 600;
-        padding: 2px 10px !important;
-        height: auto !important;
-    }
+  &__badge {
+    background: #e9f2ff !important;
+    color: $brand_color !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600;
+    padding: 2px 10px !important;
+    height: auto !important;
+  }
 
-    &__planTitle {
-        font-weight: 600;
+  &__planTitle {
+    font-weight: 600;
+    opacity: 0.95;
+  }
+
+  &__features {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      font-size: 13px;
+      line-height: 1.4;
+      margin: 8px 0;
+      color: #f4f8ff;
+
+      .anticon {
+        font-size: 14px;
+        margin-top: 2px;
+        color: #dff6df; // soft green check
+      }
+
+      span {
         opacity: 0.95;
+      }
     }
+  }
 
-    &__features {
-        list-style: none;
-        margin: 0;
-        padding: 0;
+  &__right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+    min-width: 180px;
+  }
 
-        li {
-            display: flex;
-            gap: 8px;
-            align-items: flex-start;
-            font-size: 13px;
-            line-height: 1.4;
-            margin: 8px 0;
-            color: #f4f8ff;
+  &__price {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
 
-            .anticon {
-                font-size: 14px;
-                margin-top: 2px;
-                color: #dff6df; // soft green check
-            }
-
-            span {
-                opacity: 0.95;
-            }
-        }
-    }
-
-    &__right {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        justify-content: center;
-        gap: 12px;
-        min-width: 180px;
-    }
-
-    &__price {
-        font-size: 40px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-    }
-
-    &__cta {
-        background: $primary_white !important;
-        color: $primary_text !important;
-        border: none !important;
-        border-radius: 10px !important;
-        height: 38px !important;
-        padding: 0 18px !important;
-        box-shadow: 0 2px 6px rgba(1, 32, 71, 0.15);
-    }
+  &__cta {
+    background: $primary_white !important;
+    color: $primary_text !important;
+    border: none !important;
+    border-radius: 10px !important;
+    height: 38px !important;
+    padding: 0 18px !important;
+    box-shadow: 0 2px 6px rgba(1, 32, 71, 0.15);
+  }
 }
 
 /* -----------------------
    Toggle Buttons
 ------------------------ */
 .subToggle {
-    display: flex;
-    gap: 8px;
-    margin: 16px 0;
-    border: 1px solid $primary_border;
-    width: fit-content;
-    padding: 5px;
-    border-radius: 8px;
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+  border: 1px solid $primary_border;
+  width: fit-content;
+  padding: 5px;
+  border-radius: 8px;
 
-    &__btn {
-        appearance: none;
-        background: $primary_white;
-        color: $primary_text;
-        border: none;
-        height: 36px;
-        padding: 0 14px;
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 13px;
-        transition: all 0.15s ease;
+  &__btn {
+    appearance: none;
+    background: $primary_white;
+    color: $primary_text;
+    border: none;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.15s ease;
 
-        &.is-active {
-            color: $primary_white;
-            background: $brand_color;
-            box-shadow: 0 2px 8px rgba(14, 130, 253, 0.25);
-            border-color: transparent;
-        }
-
-        &:hover {
-            border-color: $brand_color;
-        }
+    &.is-active {
+      color: $primary_white;
+      background: $brand_color;
+      box-shadow: 0 2px 8px rgba(14, 130, 253, 0.25);
+      border-color: transparent;
     }
+
+    &:hover {
+      border-color: $brand_color;
+    }
+  }
 }
 
 /* -----------------------
    Table Styles
 ------------------------ */
 .subTableWrap {
-    border: 1px solid $primary_border;
-    border-radius: 12px;
-    overflow: hidden; // keeps rounded corners on the antd table
+  border: 1px solid $primary_border;
+  border-radius: 12px;
+  overflow: hidden; // keeps rounded corners on the antd table
 }
 
 .subTable {
-    .ant-table {
-        background: $primary_white;
-    }
+  .ant-table {
+    background: $primary_white;
+  }
 
-    .ant-table-thead>tr>th {
-        background: #f6f9fc !important;
-        color: $primary_text;
-        font-weight: 700;
-        border-bottom: 1px solid $primary_border !important;
-        padding: 12px;
-    }
+  .ant-table-thead > tr > th {
+    background: #f6f9fc !important;
+    color: $primary_text;
+    font-weight: 700;
+    border-bottom: 1px solid $primary_border !important;
+    padding: 12px;
+  }
 
-    .ant-table-tbody>tr>td {
-        border-bottom: 1px solid $primary_border !important;
-        color: $secondary_text;
-        padding: 12px;
-    }
+  .ant-table-tbody > tr > td {
+    border-bottom: 1px solid $primary_border !important;
+    color: $secondary_text;
+    padding: 12px;
+  }
 
-    .ant-table-tbody>tr:last-child>td {
-        border-bottom: none !important;
+  .ant-table-tbody > tr:last-child > td {
+    border-bottom: none !important;
+  }
+}
+
+.patientsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.patientItem {
+  border: 1px solid $primary_border;
+  background: #f6f9fc;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  gap: 10px;
+
+  &.is-selected {
+    border-color: #1677ff;
+    box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.15);
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    strong {
+      display: block;
+      color: $primary_text;
+      font-weight: 700;
     }
+    small {
+      color: $secondary_text;
+      display: block;
+      margin-top: 2px;
+    }
+  }
 }
 
 /* Utility */
 .text-ellipsis {
-    display: -webkit-box;
-    //   -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  display: -webkit-box;
+  //   -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 @media (max-width: 640px) {
-    .planCard {
-        grid-template-columns: 1fr;
+  .planCard {
+    grid-template-columns: 1fr;
 
-        &__right {
-            align-items: flex-start;
-        }
+    &__right {
+      align-items: flex-start;
     }
+  }
 }

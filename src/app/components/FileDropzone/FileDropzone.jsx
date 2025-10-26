@@ -17,18 +17,18 @@ const FileDropzone = forwardRef(
     {
       title,
       required = false,
-      accept,               // e.g. ".pdf,.png,.jpg" or "image/*"
+      accept, // e.g. ".pdf,.png,.jpg" or "image/*"
       multiple = false,
-      maxSizeMB,            // number | undefined
+      maxSizeMB, // number | undefined
       disabled = false,
       helperText = "",
       errorText = "",
-      value = [],           // Array<File>; controlled selected files (optional)
-      onChange,             // (files: File[]) => void
+      value = [], // Array<File>; controlled selected files (optional)
+      onChange, // (files: File[]) => void
       placeholder = "Drag or drop your file here",
       name = "file-upload",
-      folderIcon = null,    // optional custom icon node
-      height = 160,         // px height of the drop area
+      folderIcon = null, // optional custom icon node
+      height = 160, // px height of the drop area
     },
     ref
   ) => {
@@ -88,67 +88,67 @@ const FileDropzone = forwardRef(
             {required && <span className="required-asterisk"> *</span>}
           </span>
         )}
+        {!files.length && (
+          <div
+            className={`filedropzone ${dragActive ? "is-drag" : ""} ${
+              disabled ? "is-disabled" : ""
+            }`}
+            style={{ height }}
+            role="button"
+            tabIndex={disabled ? -1 : 0}
+            aria-disabled={disabled}
+            aria-label={placeholder}
+            onClick={chooseFiles}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                chooseFiles();
+              }
+            }}
+            onDragEnter={(e) => onDrag(e, true)}
+            onDragOver={(e) => onDrag(e, true)}
+            onDragLeave={(e) => onDrag(e, false)}
+            onDrop={onDrop}
+          >
+            <input
+              ref={inputRef}
+              type="file"
+              name={name}
+              accept={accept}
+              multiple={multiple}
+              disabled={disabled}
+              onChange={onInputChange}
+              style={{ display: "none" }}
+            />
 
-        <div
-          className={`filedropzone ${dragActive ? "is-drag" : ""} ${
-            disabled ? "is-disabled" : ""
-          }`}
-          style={{ height }}
-          role="button"
-          tabIndex={disabled ? -1 : 0}
-          aria-disabled={disabled}
-          aria-label={placeholder}
-          onClick={chooseFiles}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              chooseFiles();
-            }
-          }}
-          onDragEnter={(e) => onDrag(e, true)}
-          onDragOver={(e) => onDrag(e, true)}
-          onDragLeave={(e) => onDrag(e, false)}
-          onDrop={onDrop}
-        >
-          <input
-            ref={inputRef}
-            type="file"
-            name={name}
-            accept={accept}
-            multiple={multiple}
-            disabled={disabled}
-            onChange={onInputChange}
-            style={{ display: "none" }}
-          />
-
-          <div className="dz-inner">
-            {folderIcon ?? (
-              <svg
-                className="dz-icon"
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <path
-                  fill="currentColor"
-                  d="M10 4l2 2h7a1 1 0 011 1v10a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h4z"
-                  opacity="0.35"
-                />
-                <path
-                  fill="currentColor"
-                  d="M4 8h16v9a2 2 0 01-2 2H6a2 2 0 01-2-2V8z"
-                />
-              </svg>
-            )}
-            <p className="dz-text">{placeholder}</p>
-            {accept && <p className="dz-subtext">Allowed: {accept}</p>}
-            {maxSizeMB && (
-              <p className="dz-subtext">Max size: {maxSizeMB} MB</p>
-            )}
+            <div className="dz-inner">
+              {folderIcon ?? (
+                <svg
+                  className="dz-icon"
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill="currentColor"
+                    d="M10 4l2 2h7a1 1 0 011 1v10a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h4z"
+                    opacity="0.35"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M4 8h16v9a2 2 0 01-2 2H6a2 2 0 01-2-2V8z"
+                  />
+                </svg>
+              )}
+              <p className="dz-text">{placeholder}</p>
+              {accept && <p className="dz-subtext">Allowed: {accept}</p>}
+              {maxSizeMB && (
+                <p className="dz-subtext">Max size: {maxSizeMB} MB</p>
+              )}
+            </div>
           </div>
-        </div>
-
+        )}
         {files.length > 0 && (
           <ul className="dz-files">
             {files.map((f, i) => (

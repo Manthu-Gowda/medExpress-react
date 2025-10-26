@@ -11,6 +11,8 @@ import Subscription from "../pages/User/Subscription/Subscription";
 import Profile from "../pages/User/Profile/Profile";
 import Settings from "../pages/User/Settings/Settings";
 import AddOrEditPatients from "../pages/User/AddOrEditPatients/AddOrEditPatients";
+import PaymentSuccess from "../pages/User/PaymentSuccess/PaymentSuccess";
+import PaymentCancel from "../pages/User/PaymentCancel/PaymentCancel";
 
 const AppRoutes = () => (
   <Routes>
@@ -23,6 +25,7 @@ const AppRoutes = () => (
     >
       <Route path="/patients" element={<Patients />} />
       <Route path="/add-patients" element={<AddOrEditPatients />} />
+      <Route path="/edit-patient/:id" element={<AddOrEditPatients />} />
       <Route path="/subscription" element={<Subscription />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
@@ -38,8 +41,10 @@ const RouterComponent = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/verification" element={<Verification />} />
         <Route path="/forgot" element={<Forgot />} />
-        <Route path="/reset" element={<Reset />} />
+        <Route path="/reset-password" element={<Reset />} />
         <Route path="/*" element={<AppRoutes />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-cancel" element={<PaymentCancel />} />
       </Routes>
     </BrowserRouter>
   );

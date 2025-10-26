@@ -1,73 +1,40 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SubHeader from "../../../components/SubHeader/SubHeader";
 import PatientsGrid from "../../../components/PatientsGrid/PatientsGrid";
 import "./Patients.scss";
-// import BackArrowIcon from "..."; // optional
-// import AddIcon from "...";       // optional
-
-const mock = [
-  {
-    id: "1",
-    fullName: "Manthu Gowda",
-    phone: "+91 9876543210",
-    email: "manthugowda@gmail.com",
-    dob: "12 Jan, 1989",
-    visaType: "Business visa",
-    visaExpDate: "12 Sep, 2028",
-    usaLastEntryDate: "12 Feb, 2025",
-    addressLine:
-      "1st Main Road, 2nd cross, Banashankari, Bengaluru, Karnataka 562127",
-  },
-  {
-    id: "2",
-    fullName: "Gowda Manthu",
-    phone: "+91 9876543210",
-    email: "manthugowda@gmail.com",
-    dob: "12 Jan, 1989",
-    visaType: "Business visa",
-    visaExpDate: "12 Sep, 2028",
-    usaLastEntryDate: "12 Feb, 2025",
-    addressLine:
-      "1st Main Road, 2nd cross, Banashankari, Bengaluru, Karnataka 562127",
-  },
-  {
-    id: "3",
-    fullName: "Brahim elabbaoui",
-    phone: "+91 9876543210",
-    email: "brahimelabbaoui1124@gmail.com",
-    dob: "12 Jan, 1989",
-    visaType: "Business visa",
-    visaExpDate: "12 Sep, 2028",
-    usaLastEntryDate: "12 Feb, 2025",
-    addressLine:
-      "1st Main Road, 2nd cross, Banashankari, Bengaluru, Karnataka 562127",
-  },
-  {
-    id: "4",
-    fullName: "Brahim elabbaoui",
-    phone: "+91 9876543210",
-    email: "brahimelabbaoui1124@gmail.com",
-    dob: "12 Jan, 1989",
-    visaType: "Business visa",
-    visaExpDate: "12 Sep, 2028",
-    usaLastEntryDate: "12 Feb, 2025",
-    addressLine:
-      "1st Main Road, 2nd cross, Banashankari, Bengaluru, Karnataka 562127",
-  },
-];
+import { GET_ALL_PATIENTS } from "../../../utils/apiPath";
+import { postApi } from "../../../utils/apiService";
+import Loader from "../../../components/Loader/Loader";
 
 const Patients = () => {
   const navigate = useNavigate();
-  const [selectedId, setSelectedId] = useState("2");
-  const data = useMemo(() => mock, []);
+  const [selectedId, setSelectedId] = useState(2);
+  const [isLoading, setIsLoading] = useState(false);
+  const [patientsData, setPatientsData] = useState([]);
 
   const handleAddPatients = () => {
     navigate("/add-patients");
   };
 
+  useEffect(() => {
+    fetchAllPatients();
+  }, []);
+
+  const fetchAllPatients = async () => {
+    setIsLoading(true);
+    try {
+      const payload = { pageIndex: 0, pageSize: 10, searchString: "" };
+      const { statusCode, data } = await postApi(GET_ALL_PATIENTS, payload);
+      if (statusCode === 200) setPatientsData(data);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="patients">
+      {isLoading && <Loader />}
       <SubHeader
         title="Patients"
         showBack={false}
@@ -79,13 +46,13 @@ const Patients = () => {
       {/* Your page body */}
       <section className="patients_sec">
         <PatientsGrid
-          items={data}
+          items={patientsData}
           selectedId={selectedId}
           onSelect={(p) => setSelectedId(p.id)}
-          onEdit={(p) => navigate(`/patients/${p.id}/edit`)}
-          onVisa={(p) => navigate(`/patients/${p.id}/visa`)}
-          onPassport={(p) => navigate(`/patients/${p.id}/passport`)}
-          onPrescriptions={(p) => navigate(`/patients/${p.id}/prescriptions`)}
+          onEdit={(p) => navigate(`/edit-patient/${p.id}`)}
+          // onVisa={onVisa}
+          // onPassport={onPassport}
+          // onPrescriptions={onPrescriptions}
         />
       </section>
     </div>

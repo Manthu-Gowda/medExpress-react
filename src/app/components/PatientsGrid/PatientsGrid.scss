@@ -2,7 +2,7 @@
 
 .patients-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, minmax(320px, 1fr)); // was 280px
   gap: 14px;
 
   @media (max-width: 960px) {

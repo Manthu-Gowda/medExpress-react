@@ -12,4 +12,11 @@
     color: $secondary_text;
     .ant-picker-input > input::placeholder { color: #8b99ae; }
   }
+   &.has-error {
+    .date-input.ant-picker {
+      border-color: red !important;
+    }
+  }
 }
+
+ 

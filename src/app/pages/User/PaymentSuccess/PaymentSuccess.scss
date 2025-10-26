@@ -1,0 +1,179 @@
+/* src/pages/payment/payment-result.scss */
+
+// colors (import your tokens)
+$brand_color: #0e82fd;
+$primary_white: #ffffff;
+$primary_black: #000000;
+$primary_stroke: #e6eef8;
+
+$primary_text: #012047;
+$secondary_text: #919cb4;
+
+$primary_bg: #eef2f5;
+$primary_border: #e6eef8;
+
+.payResult {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(1200px 600px at 50% -20%, rgba(14,130,253,0.12), transparent),
+              linear-gradient(180deg, #f7f9fc 0%, #eef2f5 100%);
+
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.payResult__card {
+  position: relative;
+  width: min(640px, 92vw);
+  background: $primary_white;
+  border: 1px solid $primary_border;
+  border-radius: 20px;
+  padding: 40px 28px;
+  box-shadow: 0 10px 30px rgba(1, 32, 71, 0.08);
+  text-align: center;
+  backdrop-filter: saturate(1.1);
+
+  &.success {
+    .payResult__title { color: $primary_text; }
+  }
+
+  &.cancel {
+    .payResult__title { color: $primary_text; }
+  }
+}
+
+.payResult__title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 12px 0 6px;
+}
+
+.payResult__subtitle {
+  font-size: 15px;
+  color: $secondary_text;
+  margin: 0 0 22px;
+}
+
+.payResult__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+/* Decorative layers */
+.payResult__burst {
+  position: absolute;
+  inset: -2px;
+  border-radius: 20px;
+  background: conic-gradient(from 180deg, rgba(14,130,253,0.25), transparent 35% 65%, rgba(14,130,253,0.25));
+  filter: blur(16px);
+  opacity: 0.5;
+  animation: spin 6s linear infinite;
+  z-index: -1;
+}
+
+.payResult__glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: 20px;
+  background: radial-gradient(260px 180px at 50% -10%, rgba(255, 70, 70, 0.20), transparent 60%),
+              radial-gradient(260px 180px at 50% 110%, rgba(255, 70, 70, 0.12), transparent 60%);
+  filter: blur(12px);
+  z-index: -1;
+}
+
+/* Icon container */
+.payResult__icon {
+  width: 104px;
+  height: 104px;
+  margin: 0 auto 8px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  position: relative;
+
+  &.successIcon {
+    background: radial-gradient(90px 90px at 50% 50%, rgba(14,130,253,0.15), transparent 70%);
+    animation: popIn 600ms ease-out both;
+  }
+
+  &.cancelIcon {
+    background: radial-gradient(90px 90px at 50% 50%, rgba(255, 70, 70, 0.15), transparent 70%);
+    animation: popIn 600ms ease-out both, subtleShake 2.2s ease-in-out 800ms infinite;
+  }
+}
+
+/* Checkmark animation */
+.check {
+  width: 72px; height: 72px;
+}
+.check__circle {
+  stroke: $brand_color; stroke-width: 2; stroke-dasharray: 166; stroke-dashoffset: 166;
+  animation: circleStroke 0.6s ease-out forwards;
+}
+.check__check {
+  stroke: $brand_color; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 48; stroke-dashoffset: 48; animation: checkStroke 0.35s 0.45s ease-out forwards;
+}
+
+/* Cross animation */
+.cross {
+  width: 72px; height: 72px;
+}
+.cross__circle {
+  stroke: #ff4646; stroke-width: 2; stroke-dasharray: 166; stroke-dashoffset: 166;
+  animation: circleStroke 0.6s ease-out forwards;
+}
+.cross__line {
+  stroke: #ff4646; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round;
+}
+.cross__line--left, .cross__line--right {
+  stroke-dasharray: 28; stroke-dashoffset: 28; animation: crossStroke 0.35s 0.45s ease-out forwards;
+}
+
+/* Confetti */
+.confetti {
+  position: absolute;
+  width: 10px; height: 14px; border-radius: 2px;
+  top: -20px; opacity: 0.9;
+  animation: fall linear infinite;
+
+  &--1 { left: 10%; background: $brand_color; animation-duration: 3.4s; animation-delay: .1s; }
+  &--2 { left: 25%; background: #12c2e9; animation-duration: 3.2s; animation-delay: .4s; }
+  &--3 { left: 40%; background: #f64f59; animation-duration: 3.6s; animation-delay: .2s; }
+  &--4 { left: 60%; background: #a8ff78; animation-duration: 3.1s; animation-delay: .5s; }
+  &--5 { left: 80%; background: #fbd786; animation-duration: 3.3s; animation-delay: .3s; }
+}
+
+/* Animations */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes popIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes circleStroke {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes checkStroke {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes crossStroke {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes fall {
+  0% { transform: translateY(-20px) rotate(0); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(120vh) rotate(360deg); opacity: 0; }
+}
+@keyframes subtleShake {
+  0%,100% { transform: translateX(0); }
+  30% { transform: translateX(-2px); }
+  60% { transform: translateX(2px); }
+}

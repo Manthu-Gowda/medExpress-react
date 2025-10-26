@@ -52,10 +52,9 @@ export default function Forgot() {
         payload
       );
       if (statusCode === 200) {
-        sessionStorage.setItem("pendingEmail", form.email);
         setIsLoading(false);
         successToast(message);
-        navigate("/reset", { state: { email: form.email } });
+        navigate("/");
       } else {
         setIsLoading(false);
         errorToast(

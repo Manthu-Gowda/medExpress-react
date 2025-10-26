@@ -1,73 +1,216 @@
-import React, { useMemo, useState } from "react";
-import { Table, Button, Tag, Radio } from "antd";
-import {
-  CheckCircleFilled,
-  ArrowLeftOutlined,
-  ArrowRightOutlined,
-} from "@ant-design/icons";
+import React, { useEffect, useMemo, useState } from "react";
+import { Table, Button, Tag, Radio, Checkbox } from "antd"; // + Checkbox
+import { CheckCircleFilled } from "@ant-design/icons";
 import "./Subscription.scss";
 import SubHeader from "../../../components/SubHeader/SubHeader";
 import CustomModal from "../../../components/CustomModal/CustomModal";
+import { getApi, postApi } from "../../../utils/apiService";
+import {
+  GET_SUBSCRIPTIONS,
+  SUBSCRIPTION_PLANS,
+  GET_ALL_UNSUBSCRIBED_PATIENTS,
+  ADD_SUBSCRIPTIONS,
+} from "../../../utils/apiPath"; // + patients & add sub
+import Loader from "../../../components/Loader/Loader";
+import { errorToast } from "../../../services/ToastHelper";
 
+const currencyUSD = (n) => {
+  if (n === undefined || n === null || n === "") return "";
+  const num = typeof n === "string" ? parseFloat(n) : n;
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(num);
+};
+
+const joinParts = (...parts) =>
+  parts
+    .map((p) => (typeof p === "string" ? p.trim() : p))
+    .filter((p) => p && String(p).length > 0)
+    .join(", ");
+
+const formatPatientAddress = (p = {}) => {
+  // Handle common API key variants safely
+  const a1 = p.address1 ?? p.addr1 ?? p.address ?? "";
+  const a2 = p.address2 ?? p.addr2 ?? "";
+  const city = p.cityName ?? p.city ?? "";
+  const state = p.stateName ?? p.state ?? "";
+  const country = p.countryName ?? p.country ?? "";
+  const zip = p.zipCode ?? p.zip ?? "";
+
+  const line = joinParts(a1, a2, city, state, country, zip);
+  return line || "—";
+};
 
 const Subscription = () => {
-  const [tab, setTab] = useState("active"); // "active" | "previous"
-    const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(null);
+  const [tab, setTab] = useState("active");
+  const [open, setOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]); // <-- multi-select IDs
+  const [plansData, setPlansData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-    const patients = Array.from({ length: 6 }).map((_, i) => ({
-    id: i + 1,
-    name: "Brahim elabbaoui",
-    address: "2nd cross, Banashankari, Bengaluru, Karnataka 562127",
-  }));
+  const [tableRows, setTableRows] = useState([]);
+  const [tableLoading, setTableLoading] = useState(false);
+  const [tableError, setTableError] = useState(null);
 
+  const [patients, setPatients] = useState([]); // <-- patients list
+  const [patientsLoading, setPatientsLoading] = useState(false);
+  const [patientsError, setPatientsError] = useState(null);
 
-  // Demo data — swap with your API results.
-  const activeRows = useMemo(
-    () =>
-      Array.from({ length: 6 }).map((_, i) => ({
-        key: i + 1,
-        slno: `${String(i + 1).padStart(2, "0")}`,
-        patient: "Brahim elabbaoui",
-        date: "12 September 2025",
-      })),
+  const columns = useMemo(
+    () => [
+      { title: "Sl No", dataIndex: "slno", key: "slno", width: 110 },
+      {
+        title: "Patient Name",
+        dataIndex: "patient",
+        key: "patient",
+        render: (t) => <span className="text-ellipsis">{t}</span>,
+      },
+      { title: "Subscribed Date", dataIndex: "date", key: "date", width: 220 },
+    ],
     []
   );
 
-  const previousRows = useMemo(
-    () =>
-      Array.from({ length: 5 }).map((_, i) => ({
-        key: i + 1,
-        slno: `${String(i + 1).padStart(2, "0")}`,
-        patient: "Ayman Zahidi",
-        date: `0${i + 3} August 2025`,
-      })),
-    []
+  const mapRows = (arr = []) =>
+    arr.map((item, idx) => ({
+      key: item.id ?? `${idx}`,
+      slno: String(idx + 1).padStart(2, "0"),
+      patient: item.patientName ?? item.name ?? "—",
+      date: item.createdDate
+        ? new Date(item.createdDate).toLocaleDateString("en-IN", {
+            year: "numeric",
+            month: "long",
+            day: "2-digit",
+          })
+        : "—",
+    }));
+
+  // fetch table rows when toggle changes
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      setTableLoading(true);
+      setTableError(null);
+      try {
+        const payload = { isActive: tab === "active" };
+        const { statusCode, data } = await postApi(GET_SUBSCRIPTIONS, payload);
+        if (!alive) return;
+        if (statusCode === 200 && Array.isArray(data)) {
+          setTableRows(mapRows(data));
+        } else {
+          setTableRows([]);
+          setTableError("Failed to load subscription rows");
+        }
+      } catch (e) {
+        if (!alive) return;
+        setTableRows([]);
+        setTableError(e?.message || "Failed to load subscription rows");
+      } finally {
+        if (alive) setTableLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [tab]);
+
+  // fetch plan banner
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const { statusCode, data } = await getApi(SUBSCRIPTION_PLANS);
+        if (statusCode === 200 && Array.isArray(data)) {
+          setPlansData(data);
+        } else {
+          setPlansData([]);
+          setError("Failed to load plans");
+        }
+      } catch (e) {
+        setPlansData([]);
+        setError(e?.message || "Failed to load plans");
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, []);
+
+  const plan = useMemo(
+    () => (Array.isArray(plansData) ? plansData[0] || null : plansData || null),
+    [plansData]
   );
 
-  const columns = [
-    {
-      title: "Sl No",
-      dataIndex: "slno",
-      key: "slno",
-      width: 110,
-    },
-    {
-      title: "Patient Name",
-      dataIndex: "patient",
-      key: "patient",
-      render: (t) => <span className="text-ellipsis">{t}</span>,
-    },
-    {
-      title: "Subscribed Date",
-      dataIndex: "date",
-      key: "date",
-      width: 220,
-    },
-  ];
+  // fetch patients (called when Subscribe is clicked)
+  const fetchAllPatients = async () => {
+    setPatientsLoading(true);
+    setPatientsError(null);
+    try {
+      const payload = { pageIndex: 0, pageSize: 50, searchString: "" };
+      const { statusCode, data } = await getApi(
+        GET_ALL_UNSUBSCRIBED_PATIENTS,
+        payload
+      );
+      if (statusCode === 200 && Array.isArray(data)) {
+        setPatients(data);
+      } else {
+        setPatients([]);
+        setPatientsError("Failed to load patients");
+      }
+    } catch (e) {
+      setPatients([]);
+      setPatientsError(e?.message || "Failed to load patients");
+    } finally {
+      setPatientsLoading(false);
+    }
+  };
+
+  // open modal + fetch patients
+  const onSubscribeClick = async () => {
+    setSelectedIds([]); // reset selection every time
+    setOpen(true);
+    await fetchAllPatients();
+  };
+
+  // toggle selection (card or checkbox)
+  const toggleSelect = (id) => {
+    setSelectedIds((curr) =>
+      curr.includes(id) ? curr.filter((x) => x !== id) : [...curr, id]
+    );
+  };
+
+  // submit AddSubscription
+  const onPayNow = async () => {
+    if (!plan?.id || selectedIds.length === 0) return;
+
+    try {
+      setIsLoading(true);
+      const payload = {
+        patientIds: selectedIds,
+        subscriptionPlanId: plan.id,
+      };
+
+      const { statusCode, data } = await postApi(ADD_SUBSCRIPTIONS, payload);
+
+      if (statusCode === 200 && data?.checkoutUrl) {
+        setOpen(false);
+        window.location.href = data.checkoutUrl;
+      } else {
+        errorToast("Failed to create subscription or no payment link found");
+      }
+    } catch (e) {
+      errorToast(e?.message || "Failed to create subscription");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="subscription">
+      {isLoading && <Loader />}
       <SubHeader title="Subscription" showBack={false} showRight={false} />
 
       <section className="subscription_sec">
@@ -75,38 +218,33 @@ const Subscription = () => {
         <div className="planCard">
           <div className="planCard__left">
             <div className="planCard__badgeRow">
-              <Tag className="planCard__badge">Business</Tag>
-              <span className="planCard__planTitle">Plan</span>
+              <Tag className="planCard__badge">
+                {plan?.isActive ? "Active" : "Inactive"}
+              </Tag>
+              <span className="planCard__planTitle">
+                {plan?.name || (error ? "—" : "Loading…")}
+              </span>
             </div>
 
             <ul className="planCard__features">
               <li>
                 <CheckCircleFilled />
-                <span>
-                  Lorem Ipsum is simply dummy text of the printing and
-                  typesetting industry.
-                </span>
-              </li>
-              <li>
-                <CheckCircleFilled />
-                <span>
-                  It is a long established fact that a reader will be
-                  distracted.
-                </span>
-              </li>
-              <li>
-                <CheckCircleFilled />
-                <span>
-                  There are many variations of passages of Lorem Ipsum
-                  available.
-                </span>
+                <span>{plan?.description || "—"}</span>
               </li>
             </ul>
           </div>
 
           <div className="planCard__right">
-            <div className="planCard__price">$50</div>
-            <Button type="primary" size="large" className="planCard__cta" onClick={() => setOpen(true)}>
+            <div className="planCard__price">
+              {plan ? currencyUSD(plan.amount) : "—"}
+            </div>
+            <Button
+              type="primary"
+              size="large"
+              className="planCard__cta"
+              onClick={onSubscribeClick} // <-- fetch patients + open modal
+              disabled={!plan?.id}
+            >
               Subscribe
             </Button>
           </div>
@@ -115,14 +253,11 @@ const Subscription = () => {
         {/* Toggle */}
         <div className="subToggle">
           <button
-            className={`subToggle__btn ${
-              tab === "active" ? "is-active" : ""
-            }`}
+            className={`subToggle__btn ${tab === "active" ? "is-active" : ""}`}
             onClick={() => setTab("active")}
           >
             Active Subscription
           </button>
-
           <button
             className={`subToggle__btn ${
               tab === "previous" ? "is-active" : ""
@@ -138,43 +273,78 @@ const Subscription = () => {
           <Table
             rowKey="key"
             columns={columns}
-            dataSource={tab === "active" ? activeRows : previousRows}
+            dataSource={tableRows}
             pagination={false}
             className="subTable"
+            loading={tableLoading}
           />
+          {tableError && (
+            <div
+              className="tableError"
+              style={{ marginTop: 8, color: "#d4380d" }}
+            >
+              {tableError}
+            </div>
+          )}
         </div>
       </section>
 
+      {/* Modal with multi-select */}
       <CustomModal
         open={open}
         title="Subscription"
         onClose={() => setOpen(false)}
         primaryText="Pay Now"
         dangerText="Cancel"
-        onPrimary={() => {
-          // your pay logic
-          console.log("Pay for patient:", selected);
-          setOpen(false);
-        }}
+        onPrimary={onPayNow} // <-- call AddSubscription
         onDanger={() => setOpen(false)}
-        primaryProps={{ disabled: !selected }}
+        primaryProps={{ disabled: selectedIds.length === 0 || !plan?.id }}
       >
         <p style={{ marginBottom: 12, color: "#012047", fontWeight: 600 }}>
-          Select Patient for Subscription
+          Select Patients for Subscription
         </p>
 
-        {patients.map((p) => (
-          <div className="patientItem" key={p.id}>
-            <div className="patientItem__text">
-              <strong>{p.name}</strong>
-              <small>Address : {p.address}</small>
-            </div>
-            <Radio
-              checked={selected === p.id}
-              onChange={() => setSelected(p.id)}
-            />
-          </div>
-        ))}
+        {patientsLoading && <div style={{ padding: 8 }}>Loading patients…</div>}
+        {patientsError && (
+          <div style={{ padding: 8, color: "#d4380d" }}>{patientsError}</div>
+        )}
+
+        <div className="patientsGrid">
+          {patients.map((p) => {
+            const id = p.id || p.patientId || p._id; // adapt to your API
+            const name = p.name || p.fullName || p.patientName || "—";
+            const address = formatPatientAddress(p);
+            const checked = selectedIds.includes(id);
+
+            return (
+              <div
+                key={id}
+                className={`patientItem ${checked ? "is-selected" : ""}`}
+                onClick={() => toggleSelect(id)} // card click toggles
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) =>
+                  (e.key === "Enter" || e.key === " ") && toggleSelect(id)
+                }
+              >
+                <div className="patientItem__text">
+                  <strong>{name}</strong>
+                  <small>Location: {address}</small>
+                </div>
+
+                {/* stopPropagation so clicking the checkbox doesn’t double-toggle */}
+                <Checkbox
+                  checked={checked}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    toggleSelect(id);
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            );
+          })}
+        </div>
       </CustomModal>
     </div>
   );

@@ -25,9 +25,11 @@ const PatientsGrid = ({
             data={p}
             isSelected={selectedId === p.id}
             onEdit={() => onEdit?.(p)}
-            onVisa={() => onVisa?.(p)}
-            onPassport={() => onPassport?.(p)}
-            onPrescriptions={() => onPrescriptions?.(p)}
+            onVisa={onVisa ? () => onVisa(p) : undefined}
+            onPassport={onPassport ? () => onPassport(p) : undefined}
+            onPrescriptions={
+              onPrescriptions ? () => onPrescriptions(p) : undefined
+            }
           />
         </div>
       ))}

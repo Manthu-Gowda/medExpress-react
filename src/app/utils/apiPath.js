@@ -13,19 +13,26 @@ export const VERIFY_EMAIL_OTP = "Accounts/VerifyEmailOTP";
 export const GET_USER_PROFILE = "Accounts/GetUserProfile";
 
 //Dropdowns
-export const GET_COUNTRY = "Dropdowns/GetCountryDropdown";
-export const GET_STATE = "Dropdowns/GetStateDropdown";
-export const GET_CITY = "Dropdowns/GetCityDropdown";
-export const GET_ZIPCODE = "Dropdowns/GetZipCodeDropdown";
+export const GET_ALL_ZIPCODE = "Dropdowns/GetZipCodeDropdown";
+export const GET_STATE_AND_CITY = "Dropdowns/GetStateAndCityByZipCode"
 
-
-//Members
-export const GET_MEMBERS = "admin/Members/GetMembers"
-export const GET_MEMBER = "admin/Members/GetMember"
+//Patients
+export const GET_ALL_PATIENTS = "user/Patients/GetPatients";
+export const GET_PATIENT_BY_ID = "user/Patients/GetPatient";
+export const ADD_PATIENT = "user/Patients/AddPatient";
+export const UPDATE_PATIENT = "user/Patients/UpdatePatient";
+export const DELETE_PATIENT = "user/Patients/DeletePatient";
 
 //Subscription
-export const GET_SUBSCRIPTION_PLANS = "SubscriptionPlans/GetSubscriptionPlans;"
-export const ADD_SUBSCRIPTION_PLANS = "SubscriptionPlans/AddSubscriptionPlans;"
-export const ENABLE_OR_DISABLE_SUBSCRIPTION = "SubscriptionPlans/EnableOrDisableSubscriptionPlans;"
+export const SUBSCRIPTION_PLANS = "user/SubscriptionPlans/GetSubscriptionPlans";
+export const GET_SUBSCRIPTIONS = "user/Subscriptions/GetSubscriptions";
+export const ADD_SUBSCRIPTIONS = "user/Subscriptions/AddSubscription";
+export const GET_ALL_UNSUBSCRIBED_PATIENTS = "user/Subscriptions/GetUnSubscribedPatients";
+
+
+
+
+
+
 
 
