@@ -21,6 +21,15 @@ import SelectInput from "../../../components/SelectInput/SelectInput";
 import DummyUser from "../../../assets/SampleUser.jpg";
 
 const PLACEHOLDER_AVATAR = DummyUser;
+const BASE_URL = "https://vibhu-solutions.s3.ap-south-1.amazonaws.com/";
+const isAbsUrl = (v = "") =>
+  /^https?:\/\//i.test(String(v)) || String(v).startsWith("data:");
+const toAbsolute = (v = "") => {
+  if (!v) return "";
+  if (isAbsUrl(v)) return v;
+  const key = String(v).trim().replace(/^\/*/, ""); // strip leading slashes
+  return `${BASE_URL}${encodeURI(key)}`;
+};
 
 /** Build a clean 1-line address for the “Location” display */
 const formatAddressLine = ({
@@ -40,12 +49,12 @@ const formatAddressLine = ({
   return [line1, line2, line3, line4].filter(Boolean).join(" • ");
 };
 
-/** API → UI mapping (handles API’s field names & the `profilePictute` typo) */
+/** API → UI mapping (handles API’s field names & the `profilePicture` typo) */
 const apiToUi = (api) => {
   if (!api) return null;
 
   const {
-    profilePictute, // note the typo from API
+    profilePicture, // note the typo from API
     userName,
     email,
     phoneNumber,
@@ -67,7 +76,7 @@ const apiToUi = (api) => {
   const street = streetRest.join(",").trim();
 
   const ui = {
-    avatar: profilePictute || PLACEHOLDER_AVATAR,
+    avatar: toAbsolute(profilePicture) || PLACEHOLDER_AVATAR,
     name: userName || "",
     phone: phoneNumber || "",
     email: email || "",
@@ -105,8 +114,13 @@ const apiToUi = (api) => {
 /** UI → API mapping for update (adjust keys if your backend expects IDs) */
 const uiToApi = (ui) => {
   const address1 = [ui.house, ui.street].filter(Boolean).join(", ");
+  const toKey = (v = "") => {
+    if (!v) return v;
+    if (v.startsWith(BASE_URL)) return decodeURI(v.slice(BASE_URL.length));
+    return v; // already a key or base64 data URL
+  };
   return {
-    profilePictute: ui.avatar, // if your backend accepts a URL/base64 here; else upload separately
+    profilePicture: toKey(ui.avatar), 
     userName: ui.name,
     phoneNumber: ui.phone,
     address1: address1,
@@ -391,8 +405,6 @@ const Profile = () => {
         const ui = apiToUi(data);
         setData(ui);
         setDraft(ui);
-        console.log("data:", data);
-        console.log("draft:", draft);
       }
     } catch (e) {
       errorToast("Failed to load profile");
