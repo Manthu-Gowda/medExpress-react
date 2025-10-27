@@ -12,7 +12,7 @@ export const saveAuthToSession = (data) => {
     userName,
     emailId,
     phoneNumber,
-    profilePictute, // note: backend typo kept as-is
+    profilePicture, // note: backend typo kept as-is
   } = data;
 
   // tokens
@@ -25,7 +25,14 @@ export const saveAuthToSession = (data) => {
   if (expiresAt) sessionStorage.setItem("expiresAt", String(expiresAt));
 
   // roles as JSON
-  sessionStorage.setItem("roles", JSON.stringify(roles || []));
+  // sessionStorage.setItem("roles", JSON.stringify(roles || []));
+  let roleValue = "";
+  if (Array.isArray(roles)) {
+    roleValue = roles.length > 0 ? roles[0] : "";
+  } else if (typeof roles === "string") {
+    roleValue = roles;
+  }
+  sessionStorage.setItem("role", roleValue);
 
   // user profile object as JSON
   sessionStorage.setItem(
@@ -35,10 +42,10 @@ export const saveAuthToSession = (data) => {
       userName,
       emailId,
       phoneNumber,
-      profilePictute,
+      profilePicture,
     })
   );
 
   // (Optional) keep raw payload for debugging
-  sessionStorage.setItem("authPayload", JSON.stringify(data));
+  // sessionStorage.setItem("authPayload", JSON.stringify(data));
 };

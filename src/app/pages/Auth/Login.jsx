@@ -77,7 +77,7 @@ export default function Login() {
       if (statusCode === 200) {
         saveAuthToSession(data);
         setIsLoading(false);
-        successToast(message);
+        successToast("Successfully Logged In");
         navigate("/patients");
       } else {
         setIsLoading(false);
@@ -102,6 +102,11 @@ export default function Login() {
             placeholder="Enter your email"
             required
             errorText={errors.email}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
           />
 
           <InputField
@@ -113,6 +118,11 @@ export default function Login() {
             placeholder="Enter your password"
             required
             errorText={errors.password}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
           />
 
           <div className="row between">
@@ -126,7 +136,6 @@ export default function Login() {
             type="submit"
             variant="primary"
             onClick={handleSubmit}
-                    
           >
             Sign In
           </ButtonComponent>
@@ -149,7 +158,7 @@ export default function Login() {
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
             className="g-icon"
           />
-          Login with Google
+          Sign In with Google
         </ButtonComponent>
       </div>
     </AuthLayout>

@@ -22,7 +22,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
   const handleLogout = () => {
-    localStorage.clear();
+    sessionStorage.clear();
     navigate("/");
   };
 

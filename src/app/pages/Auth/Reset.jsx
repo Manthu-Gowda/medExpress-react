@@ -1,4 +1,4 @@
-// src/pages/Auth/Login.jsx
+// src/pages/Auth/Reset.jsx
 import { useEffect, useMemo, useState } from "react";
 import "./AuthStyles.scss";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
@@ -15,31 +15,41 @@ const initialValues = {
 };
 
 export default function Reset() {
-    const location = useLocation();
+  const location = useLocation();
   const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
+
+  // Extract email & token from URL
+  const emailFromUrl = searchParams.get("email") || "";
+  const tokenFromUrl = searchParams.get("token") || "";
+
+  // Fallback: also check state/sessionStorage if needed
   const emailFromState = location?.state?.email || "";
   const cachedEmail =
     typeof window !== "undefined" ? sessionStorage.getItem("pendingEmail") : "";
+
   const email = useMemo(
-    () => emailFromState || cachedEmail || "",
-    [emailFromState, cachedEmail]
+    () => emailFromUrl || emailFromState || cachedEmail || "",
+    [emailFromUrl, emailFromState, cachedEmail]
   );
+
+  const [token] = useState(tokenFromUrl);
   const [form, setForm] = useState(initialValues);
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-      if (!email) {
-        errorToast("Missing email. Please register again.");
-        navigate("/forgot"); // or back to signup
-      }
-    }, [email, navigate]);
-  
+  useEffect(() => {
+    if (!email || !token) {
+      errorToast("Invalid or missing reset link. Please request a new one.");
+      navigate("/");
+    }
+  }, [email, token, navigate]);
 
   const onChange = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
   const validateFields = () => {
-    let errObj = { ...initialValues };
+    let errObj = {};
 
     if (!form.password) {
       errObj.password = "This field is required";
@@ -50,42 +60,34 @@ export default function Reset() {
     ) {
       errObj.password =
         "Password must be 8+ characters, with uppercase, lowercase, number, and special character.";
-    } else {
-      errObj.password = "";
     }
 
     if (!form.confirmPassword) {
       errObj.confirmPassword = "This field is required";
     } else if (form.password !== form.confirmPassword) {
       errObj.confirmPassword = "Passwords do not match";
-    } else {
-      errObj.confirmPassword = "";
     }
 
-    setErrors((prev) => ({ ...prev, ...errObj }));
-    const data = Object.values(errObj).every((x) => x === "" || x === null);
-    return data;
+    setErrors(errObj);
+    return Object.keys(errObj).length === 0;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     if (validateFields()) {
       setIsLoading(true);
       const payload = {
         email,
-        token: "",
+        token,
         password: form.password,
       };
-      const { statusCode, data, message } = await postApi(
-        RESET_PASSWORD,
-        payload
-      );
+      const { statusCode, message } = await postApi(RESET_PASSWORD, payload);
+      setIsLoading(false);
       if (statusCode === 200) {
-        setIsLoading(false);
-        successToast(message);
+        successToast("Password reset successful! Please sign in.");
         navigate("/");
       } else {
-        setIsLoading(false);
-        errorToast(message);
+        errorToast(message || "Failed to reset password.");
       }
     }
   };
@@ -94,7 +96,10 @@ export default function Reset() {
     <AuthLayout>
       <div className="login-card">
         <h1 className="title">Set New Password</h1>
-        <p className="subtitle">Enter new password to login your account</p>
+        <p className="subtitle">
+          Enter your new password to access your account
+        </p>
+
         <form className="form" onSubmit={handleSubmit} noValidate>
           <InputField
             title="New Password"
@@ -105,6 +110,11 @@ export default function Reset() {
             placeholder="Enter new password"
             required
             errorText={errors.password}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
           />
           <InputField
             title="Confirm New Password"
@@ -115,9 +125,18 @@ export default function Reset() {
             placeholder="Confirm new password"
             required
             errorText={errors.confirmPassword}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
           />
 
-          <ButtonComponent type="submit" variant="primary">
+          <ButtonComponent
+            type="submit"
+            variant="primary"
+            isLoading={isLoading}
+          >
             Reset Password
           </ButtonComponent>
         </form>

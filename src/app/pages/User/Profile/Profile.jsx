@@ -21,15 +21,6 @@ import SelectInput from "../../../components/SelectInput/SelectInput";
 import DummyUser from "../../../assets/SampleUser.jpg";
 
 const PLACEHOLDER_AVATAR = DummyUser;
-const BASE_URL = "https://vibhu-solutions.s3.ap-south-1.amazonaws.com/";
-const isAbsUrl = (v = "") =>
-  /^https?:\/\//i.test(String(v)) || String(v).startsWith("data:");
-const toAbsolute = (v = "") => {
-  if (!v) return "";
-  if (isAbsUrl(v)) return v;
-  const key = String(v).trim().replace(/^\/*/, ""); // strip leading slashes
-  return `${BASE_URL}${encodeURI(key)}`;
-};
 
 /** Build a clean 1-line address for the “Location” display */
 const formatAddressLine = ({
@@ -76,7 +67,7 @@ const apiToUi = (api) => {
   const street = streetRest.join(",").trim();
 
   const ui = {
-    avatar: toAbsolute(profilePicture) || PLACEHOLDER_AVATAR,
+    avatar: profilePicture || PLACEHOLDER_AVATAR,
     name: userName || "",
     phone: phoneNumber || "",
     email: email || "",

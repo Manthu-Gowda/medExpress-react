@@ -8,6 +8,7 @@ import { REGISTER } from "../../utils/apiPath";
 import { postApi } from "../../utils/apiService";
 import { errorToast, successToast } from "../../services/ToastHelper";
 import Loader from "../../components/Loader/Loader";
+import { useNavigate } from "react-router-dom";
 
 const initialValues = {
   username: "",
@@ -20,6 +21,7 @@ export default function SignUp() {
   const [login, setLogin] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -114,6 +116,11 @@ export default function SignUp() {
             placeholder="Enter your username"
             required
             errorText={errors.username}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
           />
           <InputField
             title="Email"
@@ -124,6 +131,11 @@ export default function SignUp() {
             placeholder="Enter your email"
             required
             errorText={errors.email}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
           />
 
           <InputField
@@ -135,6 +147,11 @@ export default function SignUp() {
             placeholder="Enter your password"
             required
             errorText={errors.password}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
           />
           <InputField
             title="Confirm Password"
@@ -145,6 +162,11 @@ export default function SignUp() {
             placeholder="Confirm your password"
             required
             errorText={errors.confirmPassword}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
           />
 
           <ButtonComponent
@@ -165,7 +187,7 @@ export default function SignUp() {
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
             className="g-icon"
           />
-          Login with Google
+          Sign In with Google
         </ButtonComponent>
         <div className="divider">
           <span>or</span>
@@ -173,7 +195,7 @@ export default function SignUp() {
         <div className="muted">
           Already have an Account?{" "}
           <a className="link" href="/">
-            Login in
+            Sign In
           </a>
         </div>
       </div>

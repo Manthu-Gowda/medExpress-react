@@ -189,10 +189,20 @@
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s;
   gap: 10px;
-
+  .ant-radio-wrapper,
+  .ant-radio {
+    margin-left: auto; 
+  }
   &.is-selected {
     border-color: #1677ff;
     box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.15);
+  }
+  .pill-selected {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #e6f4ff;
+    color: #1677ff;
   }
 
   &__text {

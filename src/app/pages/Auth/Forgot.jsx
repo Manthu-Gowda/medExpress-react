@@ -1,5 +1,5 @@
 // src/pages/Auth/Login.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./AuthStyles.scss";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import InputField from "../../components/InputField/InputField";
@@ -19,6 +19,10 @@ export default function Forgot() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    sessionStorage.clear();
+  }, []);
 
   const onChange = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -53,15 +57,13 @@ export default function Forgot() {
       );
       if (statusCode === 200) {
         setIsLoading(false);
-        successToast(message);
-        navigate("/");
+        successToast(
+          "We've sent a reset password link to your registered email ID."
+        );
+        // navigate("/");
       } else {
         setIsLoading(false);
-        errorToast(
-          err?.response?.data?.message ||
-            err?.message ||
-            "Something went wrong. Please try again."
-        );
+        errorToast(message);
       }
     }
   };
@@ -84,6 +86,11 @@ export default function Forgot() {
             placeholder="Enter your email"
             required
             errorText={errors.email}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSubmit();
+              }
+            }}
           />
 
           <ButtonComponent

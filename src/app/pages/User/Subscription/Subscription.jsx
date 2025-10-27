@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Table, Button, Tag, Radio, Checkbox } from "antd"; // + Checkbox
+import { Table, Button, Tag, Radio, Empty } from "antd"; // + Checkbox
 import { CheckCircleFilled } from "@ant-design/icons";
 import "./Subscription.scss";
 import SubHeader from "../../../components/SubHeader/SubHeader";
@@ -47,7 +47,7 @@ const formatPatientAddress = (p = {}) => {
 const Subscription = () => {
   const [tab, setTab] = useState("active");
   const [open, setOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState([]); // <-- multi-select IDs
+  const [selectedId, setSelectedId] = useState(null); // <-- multi-select IDs
   const [plansData, setPlansData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -170,26 +170,24 @@ const Subscription = () => {
 
   // open modal + fetch patients
   const onSubscribeClick = async () => {
-    setSelectedIds([]); // reset selection every time
+    setSelectedId(null); // reset selection every time
     setOpen(true);
     await fetchAllPatients();
   };
 
   // toggle selection (card or checkbox)
   const toggleSelect = (id) => {
-    setSelectedIds((curr) =>
-      curr.includes(id) ? curr.filter((x) => x !== id) : [...curr, id]
-    );
+    setSelectedId((curr) => (curr === id ? null : id));
   };
 
   // submit AddSubscription
   const onPayNow = async () => {
-    if (!plan?.id || selectedIds.length === 0) return;
+    if (!plan?.id || !selectedId) return;
 
     try {
       setIsLoading(true);
       const payload = {
-        patientIds: selectedIds,
+        patientIds: [selectedId],
         subscriptionPlanId: plan.id,
       };
 
@@ -298,53 +296,58 @@ const Subscription = () => {
         dangerText="Cancel"
         onPrimary={onPayNow} // <-- call AddSubscription
         onDanger={() => setOpen(false)}
-        primaryProps={{ disabled: selectedIds.length === 0 || !plan?.id }}
+        primaryProps={{
+          disabled: selectedId == null || patients.length === 0,
+        }}
       >
         <p style={{ marginBottom: 12, color: "#012047", fontWeight: 600 }}>
-          Select Patients for Subscription
+          Select a Patient for Subscription
         </p>
 
         {patientsLoading && <div style={{ padding: 8 }}>Loading patients…</div>}
         {patientsError && (
           <div style={{ padding: 8, color: "#d4380d" }}>{patientsError}</div>
         )}
+        {!patientsLoading && !patientsError && patients.length === 0 ? (
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description="No patients available"
+            style={{ padding: 16 }}
+          />
+        ) : (
+          <div className="patientsGrid">
+            {patients.map((p) => {
+              const id = p.id || p.patientId || p._id;
+              const name = p.name || p.fullName || p.patientName || "—";
+              const address = formatPatientAddress(p);
+              const checked = selectedId === id;
 
-        <div className="patientsGrid">
-          {patients.map((p) => {
-            const id = p.id || p.patientId || p._id; // adapt to your API
-            const name = p.name || p.fullName || p.patientName || "—";
-            const address = formatPatientAddress(p);
-            const checked = selectedIds.includes(id);
+              return (
+                <div
+                  key={id}
+                  className={`patientItem ${checked ? "is-selected" : ""}`}
+                  onClick={() => setSelectedId(id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) =>
+                    (e.key === "Enter" || e.key === " ") && setSelectedId(id)
+                  }
+                >
+                  <div className="patientItem__text">
+                    <strong>{name}</strong>
+                    <small>Address : {address}</small>
+                  </div>
 
-            return (
-              <div
-                key={id}
-                className={`patientItem ${checked ? "is-selected" : ""}`}
-                onClick={() => toggleSelect(id)} // card click toggles
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) =>
-                  (e.key === "Enter" || e.key === " ") && toggleSelect(id)
-                }
-              >
-                <div className="patientItem__text">
-                  <strong>{name}</strong>
-                  <small>Location: {address}</small>
+                  <Radio
+                    checked={checked}
+                    onChange={() => setSelectedId(id)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
                 </div>
-
-                {/* stopPropagation so clicking the checkbox doesn’t double-toggle */}
-                <Checkbox
-                  checked={checked}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    toggleSelect(id);
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </CustomModal>
     </div>
   );

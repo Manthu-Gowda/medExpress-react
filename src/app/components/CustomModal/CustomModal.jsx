@@ -29,6 +29,7 @@ const CustomModal = ({
   className = "",
   bodyClassName = "",
   closable = true,
+  
 }) => {
   const handleDanger = onDanger || onClose;
 

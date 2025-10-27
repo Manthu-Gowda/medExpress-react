@@ -2,6 +2,8 @@ import React, { useRef, useState, forwardRef } from "react";
 import "./FileDropzone.scss";
 
 const formatSize = (bytes) => {
+  // no size for URL items
+  if (typeof bytes !== "number" || !isFinite(bytes)) return null;
   if (bytes === 0) return "0 B";
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB"];
@@ -149,31 +151,43 @@ const FileDropzone = forwardRef(
             </div>
           </div>
         )}
-        {files.length > 0 && (
-          <ul className="dz-files">
-            {files.map((f, i) => (
-              <li key={i} className="dz-file">
-                <span className="dz-file-name" title={f.name}>
-                  {f.name}
-                </span>
-                <span className="dz-file-size">{formatSize(f.size)}</span>
-                {!disabled && (
-                  <button
-                    type="button"
-                    className="dz-remove"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearOne(i);
-                    }}
-                    aria-label={`Remove ${f.name}`}
-                  >
-                    ×
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+   {files.length > 0 && (
+  <ul className="dz-files">
+    {files.map((f, i) => {
+      // name fallbacks: name → fileName → originFileObj.name → last path segment
+      const niceName =
+        f?.name ||
+        f?.fileName ||
+        f?.originFileObj?.name ||
+        (typeof f?.url === "string" ? f.url.split("/").pop() : "Document");
+
+      // size from File/UploadFile; URL items usually have none
+      const sizeVal = typeof f?.size === "number"
+        ? f.size
+        : (typeof f?.originFileObj?.size === "number" ? f.originFileObj.size : undefined);
+
+      const sizeText = formatSize(sizeVal);
+
+      return (
+        <li key={i} className="dz-file">
+          <span className="dz-file-name" title={niceName}>{niceName}</span>
+          {sizeText && <span className="dz-file-size">{sizeText}</span>}
+          {!disabled && (
+            <button
+              type="button"
+              className="dz-remove"
+              onClick={(e) => { e.stopPropagation(); clearOne(i); }}
+              aria-label={`Remove ${niceName}`}
+            >
+              ×
+            </button>
+          )}
+        </li>
+      );
+    })}
+  </ul>
+)}
+
 
         {hasError ? (
           <span className="input-error-text">{errorText}</span>

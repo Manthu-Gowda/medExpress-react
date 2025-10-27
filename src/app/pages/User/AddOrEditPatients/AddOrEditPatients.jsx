@@ -31,6 +31,10 @@ const VISA_ID_TO_LABEL = Object.fromEntries(
   VISA_TYPES.map((o) => [o.value, o.label])
 );
 
+// helpers (near other date helpers)
+const disabledTodayAndFuture = (current) =>
+  current && !dayjs(current).isBefore(dayjs(), "day"); // disables today & future
+
 const initialErrors = {
   patientName: "",
   phone: "",
@@ -39,7 +43,7 @@ const initialErrors = {
   visaType: "", // keep the same key if your InputField shows errors.visaType
   visaExpiry: "",
   lastEntry: "",
-  zipId: "",
+  zipCodeId: "",
   city: "",
   state: "",
   street: "",
@@ -72,7 +76,7 @@ const AddOrEditPatients = () => {
     visaTypeName: "", // <-- store the label here
     visaExpiry: null,
     lastEntry: null,
-    zipId: undefined,
+    zipCodeId: undefined,
     stateId: undefined,
     cityId: undefined,
     countryId: "5f030c51-ae0b-4fd5-8a4c-39f74e63c570",
@@ -99,6 +103,14 @@ const AddOrEditPatients = () => {
   const cacheRef = useRef(new Map());
   const cityStateAbortRef = useRef(null);
 
+  const upsertZipOption = (id, label) => {
+    if (!id || !label) return;
+    setZipOptions((prev) => {
+      if (prev?.some((o) => o.value === id)) return prev;
+      return [{ value: id, label }, ...(prev || [])];
+    });
+  };
+
   const patchFormFromApi = (data) => {
     setForm((p) => ({
       ...p,
@@ -115,7 +127,7 @@ const AddOrEditPatients = () => {
       street: data?.address1 ?? "",
       apt: data?.address2 ?? "",
 
-      zipId: data?.zipCodeId ?? undefined,
+      zipCodeId: data?.zipCodeId ?? undefined,
       cityId: data?.cityId ?? undefined,
       stateId: data?.stateId ?? undefined,
       countryId: data?.countryId ?? "5f030c51-ae0b-4fd5-8a4c-39f74e63c570",
@@ -123,8 +135,48 @@ const AddOrEditPatients = () => {
       // display strings; you might get names in payload or you can fetch via zip
       city: data?.cityName ?? "",
       state: data?.stateName ?? "",
-      zip: data?.zip ?? "",
+      zip: data?.zipCode ?? "",
     }));
+    setFiles({
+      passport: data?.passport?.url
+        ? [
+            {
+              uid: "-1", // required by AntD Upload
+              name: data.passport.fileName || "Passport.pdf", // name for display
+              status: "done", // mark as uploaded
+              url: data.passport.url, // S3 file
+              fileName: data.passport.fileName, // keep original filename
+            },
+          ]
+        : [],
+
+      visa: data?.visa?.url
+        ? [
+            {
+              uid: "-2",
+              name: data.visa.fileName || "Visa.pdf",
+              status: "done",
+              url: data.visa.url,
+              fileName: data.visa.fileName,
+            },
+          ]
+        : [],
+
+      prescription: Array.isArray(data?.prescriptions)
+        ? data.prescriptions.map((p, i) => ({
+            uid: `presc-${i}`,
+            name: p.fileName || `Prescription_${i + 1}.pdf`,
+            status: "done",
+            url: p.url,
+            fileName: p.fileName,
+          }))
+        : [],
+    });
+
+    if (data?.zipCodeId) {
+      const label = data?.zip || ""; // if your API returns 'zip' text
+      upsertZipOption(data.zipCodeId, label);
+    }
 
     if (data?.zipCodeId && (!data?.cityName || !data?.stateName)) {
       fetchStateAndCityByZipCode(data.zipCodeId);
@@ -186,12 +238,12 @@ const AddOrEditPatients = () => {
     }
     if (!form.lastEntry) {
       errObj.lastEntry = "USA last entry date is required";
-    } else if (isFuture(form.lastEntry)) {
-      errObj.lastEntry = "Last entry cannot be in the future";
+    } else if (!dayjs(form.lastEntry).isBefore(dayjs(), "day")) {
+      errObj.lastEntry = "Last entry cannot be today or in the future";
     }
-    // Zip (required -> use zipId since Select stores UUID)
-    if (!form.zipId) {
-      errObj.zipId = "Zip Code is required";
+    // Zip (required -> use zipCodeId since Select stores UUID)
+    if (!form.zipCodeId) {
+      errObj.zipCodeId = "Zip Code is required";
     }
     if (!form.city?.trim()) {
       errObj.city = "City is required";
@@ -222,6 +274,9 @@ const AddOrEditPatients = () => {
     return isValid;
   };
 
+  const clearError = (key) =>
+    setErrors((prev) => (prev[key] ? { ...prev, [key]: "" } : prev));
+
   const disabledFuture = (current) => current && current > dayjs().endOf("day");
   const update = (name) => (e) => {
     const value = e?.target ? e.target.value : e;
@@ -248,8 +303,8 @@ const AddOrEditPatients = () => {
     }
   };
 
-  const fetchStateAndCityByZipCode = async (zipId) => {
-    if (!zipId) return;
+  const fetchStateAndCityByZipCode = async (zipCodeId) => {
+    if (!zipCodeId) return;
 
     // cancel any previous request (user might change selection quickly)
     cancelCityStateInFlight();
@@ -258,7 +313,7 @@ const AddOrEditPatients = () => {
 
     try {
       const { statusCode, data } = await getApi(GET_STATE_AND_CITY, {
-        params: { zipCodeId: zipId },
+        params: { zipCodeId: zipCodeId },
         signal: controller.signal,
       });
 
@@ -359,7 +414,7 @@ const AddOrEditPatients = () => {
   const handleZipChange = (value, option) => {
     setForm((p) => ({
       ...p,
-      zipId: value,
+      zipCodeId: value,
       zip: option?.label || "",
       city: "",
       state: "",
@@ -370,18 +425,62 @@ const AddOrEditPatients = () => {
   };
 
   const handleZipClear = () => {
-    setForm((p) => ({ ...p, zipId: undefined, zip: "", city: "", state: "" }));
+    setForm((p) => ({
+      ...p,
+      zipCodeId: undefined,
+      zip: "",
+      city: "",
+      state: "",
+    }));
   };
 
   const getRawFile = (f) => f?.originFileObj ?? f;
 
-  const fileToBase64StringOnly = (file) =>
+  // ===== helpers: put above handleSubmit =====
+
+  // Turn "File" into { fileName, base64 }
+  const fileToBase64 = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+
+  // Normalize one item (File OR {url,fileName,type,size}) to API shape
+const toApiDoc = async (item) => {
+  if (!item) return null;
+
+  // New upload (File or AntD UploadFile)
+  if (item.originFileObj) {
+    const f = item.originFileObj;
+    const base64 = await fileToBase64(f);
+    return {
+      fileName: f.name,
+      url: base64, // or 'base64' if you want to rename key
+    };
+  }
+
+  // Existing file (from patchFormFromApi)
+  return {
+    url: item.url,
+    fileName: item.fileName || item.name,
+  };
+};
+
+  // Single-file control -> returns object or null
+  const oneToApiDoc = async (arr = []) => {
+    if (!Array.isArray(arr) || !arr.length) return null;
+    return await toApiDoc(arr[0]);
+  };
+
+  // Multi-file control -> returns array of objects or null
+  const manyToApiDocs = async (arr = []) => {
+    if (!Array.isArray(arr) || !arr.length) return null;
+    const out = [];
+    for (const it of arr) out.push(await toApiDoc(it));
+    return out;
+  };
 
   const encodeOne = async (arr = []) => {
     const raw = arr?.[0] ? getRawFile(arr[0]) : null;
@@ -404,14 +503,9 @@ const AddOrEditPatients = () => {
 
     try {
       setIsLoading(true);
-      const passport = files.passport?.length
-        ? await encodeOne(files.passport)
-        : null;
-      const visa = files.visa?.length ? await encodeOne(files.visa) : null;
-      const prescriptions = files.prescription?.length
-        ? await encodeMany(files.prescription)
-        : null;
-
+      const passport = await oneToApiDoc(files.passport);
+      const visa = await oneToApiDoc(files.visa);
+      const prescriptions = await manyToApiDocs(files.prescription);
       const payload = {
         // names & contacts
         name: form.patientName?.trim(),
@@ -432,10 +526,14 @@ const AddOrEditPatients = () => {
         address2: form.apt?.trim() || "",
 
         // location IDs (schema field names!)
-        zipCodeId: form.zipId,
+        zipCodeId: form.zipCodeId,
         cityId: form.cityId,
         stateId: form.stateId,
         countryId: form.countryId || null,
+
+        passport,
+        visa,
+        prescriptions,
       };
       if (passport !== undefined) payload.passport = passport;
       if (visa !== undefined) payload.visa = visa;
@@ -543,6 +641,7 @@ const AddOrEditPatients = () => {
             onChange={(d) => update("lastEntry")(d)}
             errorText={errors.lastEntry}
             required
+            disabledDate={disabledTodayAndFuture}
           />
         </div>
 
@@ -554,8 +653,10 @@ const AddOrEditPatients = () => {
             title="Zip Code"
             placeholder="Search Zip Code"
             options={zipOptions} // [{label, value}]
-            value={form.zipId} // UUID
-            onChange={handleZipChange} // keeps zipId + zip label
+            value={
+              form.zipCodeId ? { value: form.zipCodeId, label: form.zip } : null
+            }
+            onChange={handleZipChange} // keeps zipCodeId + zip label
             showSearch
             allowClear
             // Remote search hooks
@@ -564,7 +665,7 @@ const AddOrEditPatients = () => {
             onFocus={handleZipFocus}
             onClear={handleZipClear}
             loading={zipLoading}
-            errorText={errors.zipId}
+            errorText={errors.zipCodeId}
             notFoundContent={zipLoading ? "Loading..." : "No results"}
             required
           />
@@ -613,14 +714,20 @@ const AddOrEditPatients = () => {
             required
             accept=".pdf,.jpg,.jpeg,.png"
             value={files.passport}
-            onChange={(f) => setFiles((p) => ({ ...p, passport: f }))}
+            onChange={(f) => {
+              setFiles((p) => ({ ...p, passport: f }));
+              if (f?.length) clearError("passport");
+            }}
             errorText={errors.passport}
           />
           <FileDropzone
             title="Visa"
             accept=".pdf,.jpg,.jpeg,.png"
             value={files.visa}
-            onChange={(f) => setFiles((p) => ({ ...p, visa: f }))}
+            onChange={(f) => {
+              setFiles((p) => ({ ...p, visa: f }));
+              if (f?.length) clearError("visa");
+            }}
             required
             errorText={errors.visa}
           />
@@ -628,7 +735,10 @@ const AddOrEditPatients = () => {
             title="Prescription"
             accept=".pdf,.jpg,.jpeg,.png"
             value={files.prescription}
-            onChange={(f) => setFiles((p) => ({ ...p, prescription: f }))}
+            onChange={(f) => {
+              setFiles((p) => ({ ...p, prescription: f }));
+              if (f?.length) clearError("prescriptions"); // note the key name
+            }}
             required
             errorText={errors.prescriptions}
           />

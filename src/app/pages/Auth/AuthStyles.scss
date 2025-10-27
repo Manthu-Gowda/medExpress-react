@@ -1,20 +1,11 @@
 @use "../../globalStyles" as *;
 @use "../../globalStyles" as *;
 
-
 .login-card {
-  // z-index: 1;
-  // width: min(480px, 92vw);
-  // background: $primary_white;
-  // border-radius: 20px;
-  // box-shadow: 0 20px 40px rgba(16, 24, 40, 0.08);
-  // padding: clamp(20px, 4vw, 40px);
-  // border: 1px solid rgba(2, 6, 23, 0.06);
-
   .title {
     font-size: 24px;
     text-align: center;
-    margin: 10px 0;
+    margin-bottom: 10px;
     color: $primary_text;
     font-weight: 600;
   }
@@ -23,12 +14,12 @@
     text-align: center;
     font-size: 14px;
     color: $secondary_text;
-    margin: 0 0 22px;
+    margin: 0 0 15px;
   }
 
   .form {
     display: grid;
-    gap: 14px;
+    gap: 10px;
   }
 
   .row {
@@ -37,8 +28,7 @@
 
     &.between {
       justify-content: space-between;
-      margin-top: 2px;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
     }
   }
 
@@ -85,8 +75,8 @@
 }
 
 /* Optional: small tweaks for very narrow screens */
-@media (max-width: 380px) {
-  .login-card {
-    padding: 16px;
-  }
-}
+// @media (max-width: 380px) {
+//   .login-card {
+//     padding: 16px;
+//   }
+// }

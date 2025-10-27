@@ -126,7 +126,7 @@ const Settings = () => {
         <h3 className="settings_title">Change Password</h3>
         <div className="settings_grid">
           <InputField
-            title="Previous Password"
+            title="Current Password"
             name="previousPassword"
             type="password"
             placeholder="Enter previous password"
@@ -161,7 +161,7 @@ const Settings = () => {
 
         <p className="settings_note">
           Forgot old password? No worries, we’ll send your reset link to your
-          email <a href="#">Click here</a>
+          email <a href="/forgot">Click here</a>
         </p>
 
         <div className="settings_actions">

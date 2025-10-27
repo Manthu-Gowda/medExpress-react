@@ -41,6 +41,8 @@ const menuItems = [
   },
 ];
 
+const BASE_URL = "https://vibhu-solutions.s3.ap-south-1.amazonaws.com/";
+
 const MainLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const screens = useBreakpoint();
@@ -48,6 +50,9 @@ const MainLayout = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const storedUser = sessionStorage.getItem("user");
+  const userData = storedUser ? JSON.parse(storedUser) : null;
+  const userRole = sessionStorage.getItem("role");
 
   useEffect(() => {
     setIsCollapsed(isPhone);
@@ -56,7 +61,7 @@ const MainLayout = () => {
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
   const handleLogout = () => {
-    localStorage.clear();
+    sessionStorage.clear();
     navigate("/");
   };
 
@@ -178,10 +183,12 @@ const MainLayout = () => {
               type="button"
               onClick={handleProfilePage}
             >
-              <img src={DummyUser} alt="User Avatar" className="user_avatar" />
+              <img src={userData.profilePicture || DummyUser} alt="User Avatar" className="user_avatar" />
               <div className="user_meta">
-                <span className="user_name">Brahim elabbaoui</span>
-                <span className="user_role">User</span>
+                <span className="user_name">
+                  {userData?.userName || "Guest"}
+                </span>
+                <span className="user_role">{userRole || "User"}</span>
               </div>
               {/* <span className="user_caret">
                 <DownArrowIcon />

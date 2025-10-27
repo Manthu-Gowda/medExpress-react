@@ -60,7 +60,7 @@ export default function Verification() {
       );
       if (statusCode === 200) {
         successToast(message || "OTP verified successfully!");
-        localStorage.removeItem("pendingEmail");
+        sessionStorage.removeItem("pendingEmail");
         setIsLoading(false);
         navigate("/");
       } else {

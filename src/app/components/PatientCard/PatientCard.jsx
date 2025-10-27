@@ -6,14 +6,7 @@ import EditIcon from "../../assets/icons/EditIcon";
 import EyeIcon from "../../assets/icons/EyeIcon";
 import ButtonComponent from "../ButtonComponent/ButtonComponent";
 
-const BASE_URL = "https://vibhu-solutions.s3.ap-south-1.amazonaws.com/";
-const toAbsolute = (url) => {
-  if (!url) return "";
-  const s = String(url).trim();
-  if (/^https?:\/\//i.test(s) || s.startsWith("data:")) return s; // already absolute or data URL
-  const key = s.replace(/^\/*/, ""); // strip leading slashes
-  return `${BASE_URL}${encodeURI(key)}`; // join + encode
-};
+const normalizeUrl = (url) => (url ? String(url).trim() : "");
 
 const Row = ({ label, value }) => (
   <div className="pc__row">
@@ -122,43 +115,32 @@ const PatientCard = ({
   const handleOpenPassport = () => {
     if (onPassport) return onPassport(data);
 
-    const items = toArray(passport).map(toAbsolute);
-
+    const items = toArray(passport).map(normalizeUrl).filter(Boolean);
     const images = items.filter(isImageUrl);
     const pdfs = items.filter(isPdfUrl);
     const others = items.filter((u) => !isImageUrl(u) && !isPdfUrl(u));
 
-    if (images.length) {
-      openPreview(images, pdfs);
-    } else if (pdfs.length) {
-      pdfs.forEach((p) => openNewTab(p));
-    } else if (others.length) {
-      others.forEach((o) => openNewTab(o));
-    }
+    if (images.length) openPreview(images, pdfs);
+    else if (pdfs.length) pdfs.forEach((p) => openNewTab(p));
+    else if (others.length) others.forEach((o) => openNewTab(o));
   };
 
   const handleOpenVisa = () => {
-    if (onVisa) return onVisa(data); // <- if parent provided, use that
-    // else run local preview logic below
-    const items = toArray(visa).map(toAbsolute);
+    if (onVisa) return onVisa(data);
+    const items = toArray(visa).map(normalizeUrl).filter(Boolean);
     const images = items.filter(isImageUrl);
     const pdfs = items.filter(isPdfUrl);
     const others = items.filter((u) => !isImageUrl(u) && !isPdfUrl(u));
 
-    if (images.length) {
-      openPreview(images, pdfs);
-    } else if (pdfs.length) {
-      pdfs.forEach((p) => openNewTab(p));
-    } else if (others.length) {
-      others.forEach((o) => openNewTab(o));
-    }
+    if (images.length) openPreview(images, pdfs);
+    else if (pdfs.length) pdfs.forEach((p) => openNewTab(p));
+    else if (others.length) others.forEach((o) => openNewTab(o));
   };
 
   const handleOpenPrescriptions = () => {
     if (onPrescriptions) return onPrescriptions(data);
 
-    const items = toArray(prescriptions).map(toAbsolute);
-
+    const items = toArray(prescriptions).map(normalizeUrl).filter(Boolean);
     const images = items.filter(isImageUrl);
     const pdfs = items.filter(isPdfUrl);
     const others = items.filter((u) => !isImageUrl(u) && !isPdfUrl(u));
@@ -266,17 +248,13 @@ const PatientCard = ({
               {pdfList.map((p, i) => (
                 <li key={p + i} style={{ marginBottom: 6 }}>
                   <a
-                    href={toAbsolute(p)}
+                    href={p}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      window.open(
-                        toAbsolute(p),
-                        "_blank",
-                        "noopener,noreferrer"
-                      );
+                      window.open(p, "_blank", "noopener,noreferrer");
                     }}
                   >
                     Open PDF {i + 1}
