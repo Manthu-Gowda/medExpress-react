@@ -6,7 +6,21 @@ import EditIcon from "../../assets/icons/EditIcon";
 import EyeIcon from "../../assets/icons/EyeIcon";
 import ButtonComponent from "../ButtonComponent/ButtonComponent";
 
-const normalizeUrl = (url) => (url ? String(url).trim() : "");
+const extractUrl = (item) => {
+  if (!item) return "";
+  if (typeof item === "string") return item.trim();
+  if (typeof item === "object") {
+    // support { url }, { href }, or any object that has a url-like field
+    if (typeof item.url === "string") return item.url.trim();
+    if (typeof item.href === "string") return item.href.trim();
+  }
+  return "";
+};
+
+const toUrlArray = (value) => {
+  const arr = Array.isArray(value) ? value : value ? [value] : [];
+  return arr.map(extractUrl).filter(Boolean);
+};
 
 const Row = ({ label, value }) => (
   <div className="pc__row">
@@ -115,7 +129,7 @@ const PatientCard = ({
   const handleOpenPassport = () => {
     if (onPassport) return onPassport(data);
 
-    const items = toArray(passport).map(normalizeUrl).filter(Boolean);
+    const items = toUrlArray(passport);
     const images = items.filter(isImageUrl);
     const pdfs = items.filter(isPdfUrl);
     const others = items.filter((u) => !isImageUrl(u) && !isPdfUrl(u));
@@ -127,7 +141,8 @@ const PatientCard = ({
 
   const handleOpenVisa = () => {
     if (onVisa) return onVisa(data);
-    const items = toArray(visa).map(normalizeUrl).filter(Boolean);
+
+    const items = toUrlArray(visa);
     const images = items.filter(isImageUrl);
     const pdfs = items.filter(isPdfUrl);
     const others = items.filter((u) => !isImageUrl(u) && !isPdfUrl(u));
@@ -140,7 +155,7 @@ const PatientCard = ({
   const handleOpenPrescriptions = () => {
     if (onPrescriptions) return onPrescriptions(data);
 
-    const items = toArray(prescriptions).map(normalizeUrl).filter(Boolean);
+    const items = toUrlArray(prescriptions);
     const images = items.filter(isImageUrl);
     const pdfs = items.filter(isPdfUrl);
     const others = items.filter((u) => !isImageUrl(u) && !isPdfUrl(u));
