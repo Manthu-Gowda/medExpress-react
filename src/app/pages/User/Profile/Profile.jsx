@@ -33,11 +33,11 @@ const formatAddressLine = ({
   country = "",
 }) => {
   const line1 = [house, street].filter(Boolean).join(", ");
-  const line2 = [unit].filter(Boolean).join("");
+  const line2 = [unit].filter(Boolean).join(",");
   const line3 = [city, state, zip].filter(Boolean).join(", ");
   const line4 = [country].filter(Boolean).join("");
 
-  return [line1, line2, line3, line4].filter(Boolean).join(" • ");
+  return [line1, line2, line3, line4].filter(Boolean).join(",  ");
 };
 
 /** API → UI mapping (handles API’s field names & the `profilePicture` typo) */
@@ -105,13 +105,17 @@ const apiToUi = (api) => {
 /** UI → API mapping for update (adjust keys if your backend expects IDs) */
 const uiToApi = (ui) => {
   const address1 = [ui.house, ui.street].filter(Boolean).join(", ");
-  const toKey = (v = "") => {
+  const normalizeAvatar = (v = "") => {
     if (!v) return v;
-    if (v.startsWith(BASE_URL)) return decodeURI(v.slice(BASE_URL.length));
-    return v; // already a key or base64 data URL
+    if (v.startsWith("data:")) {
+      const parts = v.split(",");
+      return parts.length > 1 ? parts[1] : v; // raw base64
+    }
+    // If it's already raw base64 or a plain key/URL, pass-through.
+    return v;
   };
   return {
-    profilePicture: toKey(ui.avatar), 
+    profilePicture: normalizeAvatar(ui.avatar),
     userName: ui.name,
     phoneNumber: ui.phone,
     address1: address1,
@@ -347,15 +351,17 @@ const Profile = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      let avatarBase64;
-      if (avatarFile) {
-        avatarBase64 = await fileToBase64StringOnly(avatarFile);
+      const base = edit ? draft : data;
+
+      const payload = uiToApi(base);
+
+      if (!avatarFile) {
+        delete payload.profilePicture;
+      } else {
+        const avatarBase64 = await fileToBase64StringOnly(avatarFile);
+        payload.profilePicture = avatarBase64;
       }
-      const base = edit ? draft : data; // ← use current source of truth
-      const payload = uiToApi({
-        ...base,
-        avatar: avatarBase64 || base.avatar,
-      });
+
       const {
         statusCode,
         data: resp,
@@ -367,13 +373,14 @@ const Profile = () => {
         const fresh = resp?.data ? apiToUi(resp.data) : { ...draft };
         setData(fresh);
         setDraft(fresh);
-        setAvatarFile(null); // clear pending file so the button goes back to "Upload"
+        setAvatarFile(null);
         setEdit(false);
       } else {
         errorToast("Unable to update profile");
       }
     } catch (e) {
-      errorToast("Unable to update profile");
+      console.error("Unable to update profile", e);
+      errorToast(e?.message || "Unable to update profile");
     } finally {
       setSaving(false);
     }
