@@ -7,8 +7,8 @@ import AuthLayout from "../../components/AuthLayout/AuthLayout";
 import { useNavigate } from "react-router-dom";
 import Loader from "../../components/Loader/Loader";
 import { errorToast, successToast } from "../../services/ToastHelper";
-import { USER_LOGIN } from "../../utils/apiPath";
-import { postApi } from "../../utils/apiService";
+import { GOOGLE_AUTH, GOOGLE_LOGIN, USER_LOGIN } from "../../utils/apiPath";
+import { getApi, postApi } from "../../utils/apiService";
 import { saveAuthToSession } from "../../services/auth";
 
 const initialValues = {
@@ -81,10 +81,35 @@ export default function Login() {
         navigate("/patients");
       } else {
         setIsLoading(false);
-        errorToast(message);
+        errorToast(message || "Invalid credentials. Please try again.");
       }
     }
   };
+
+  // STEP 1: Get Google login URL and redirect
+const handleGoogleLogin = async () => {
+  try {
+    setIsLoading(true);
+    const res = await getApi(GOOGLE_LOGIN);
+    const raw = res;
+    const loginUrl =
+      typeof raw === "string"
+        ? raw
+        : raw?.url || raw?.loginUrl || raw?.authorizationUrl;
+
+    if (!loginUrl) {
+      errorToast("Could not start Google Sign-In. Please try again.");
+      return;
+    }
+
+    // 🚀 Direct full-page redirect (no popup)
+    window.location.href = loginUrl;
+  } catch (err) {
+    errorToast("Failed to start Google Sign-In");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <AuthLayout>
@@ -152,7 +177,11 @@ export default function Login() {
           <span>or</span>
         </div>
 
-        <ButtonComponent variant="transparent" style={{ width: "100%" }}>
+        <ButtonComponent
+          variant="transparent"
+          style={{ width: "100%" }}
+          onClick={handleGoogleLogin}
+        >
           <img
             alt="Google"
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"

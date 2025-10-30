@@ -12,6 +12,10 @@ export const UPDATE_EMAIL = "Accounts/UpdateEmail";
 export const VERIFY_EMAIL_OTP = "Accounts/VerifyEmailOTP";
 export const GET_USER_PROFILE = "Accounts/GetUserProfile";
 
+//Google
+export const GOOGLE_LOGIN = "Accounts/GetGoogleLoginUrl";
+export const GOOGLE_AUTH = "Accounts/GoogleAuthentication";
+
 //Dropdowns
 export const GET_ALL_ZIPCODE = "Dropdowns/GetZipCodeDropdown";
 export const GET_STATE_AND_CITY = "Dropdowns/GetStateAndCityByZipCode"

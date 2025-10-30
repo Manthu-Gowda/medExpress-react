@@ -13,6 +13,7 @@ import Settings from "../pages/User/Settings/Settings";
 import AddOrEditPatients from "../pages/User/AddOrEditPatients/AddOrEditPatients";
 import PaymentSuccess from "../pages/User/PaymentSuccess/PaymentSuccess";
 import PaymentCancel from "../pages/User/PaymentCancel/PaymentCancel";
+import SigninGoogle from "../pages/Auth/SigninGoogle";
 
 const AppRoutes = () => (
   <Routes>
@@ -38,6 +39,7 @@ const RouterComponent = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/signin-google" element={<SigninGoogle />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/verification" element={<Verification />} />
         <Route path="/forgot" element={<Forgot />} />

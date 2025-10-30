@@ -4,8 +4,8 @@ import "./AuthStyles.scss";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import InputField from "../../components/InputField/InputField";
 import AuthLayout from "../../components/AuthLayout/AuthLayout";
-import { REGISTER } from "../../utils/apiPath";
-import { postApi } from "../../utils/apiService";
+import { GOOGLE_LOGIN, REGISTER } from "../../utils/apiPath";
+import { getApi, postApi } from "../../utils/apiService";
 import { errorToast, successToast } from "../../services/ToastHelper";
 import Loader from "../../components/Loader/Loader";
 import { useNavigate } from "react-router-dom";
@@ -101,6 +101,30 @@ export default function SignUp() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true);
+      const res = await getApi(GOOGLE_LOGIN);
+      const raw = res;
+      const loginUrl =
+        typeof raw === "string"
+          ? raw
+          : raw?.url || raw?.loginUrl || raw?.authorizationUrl;
+
+      if (!loginUrl) {
+        errorToast("Could not start Google Sign-In. Please try again.");
+        return;
+      }
+
+      // 🚀 Direct full-page redirect (no popup)
+      window.location.href = loginUrl;
+    } catch (err) {
+      errorToast("Failed to start Google Sign-In");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AuthLayout>
       {isLoading && <Loader />}
@@ -181,6 +205,7 @@ export default function SignUp() {
         <ButtonComponent
           variant="transparent"
           style={{ marginTop: "20px", width: "100%" }}
+          onClick={handleGoogleLogin}
         >
           <img
             alt="Google"
