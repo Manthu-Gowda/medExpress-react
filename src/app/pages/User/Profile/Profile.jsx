@@ -163,6 +163,15 @@ const Profile = () => {
   const cacheRef = useRef(new Map());
   const cityStateAbortRef = useRef(null);
 
+  const upsertZipOption = (id, label) => {
+    if (!id || !label) return;
+    setZipOptions((prev) => {
+      const list = Array.isArray(prev) ? prev : [];
+      if (list.some((o) => o.value === id)) return list;
+      return [{ value: id, label }, ...list];
+    });
+  };
+
   const runDebounced = (fn, delay = 250) => {
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(fn, delay);
@@ -401,6 +410,7 @@ const Profile = () => {
       const { statusCode, data } = await getApi(GET_USER_PROFILE);
       if (statusCode === 200) {
         const ui = apiToUi(data);
+        if (ui?.zipId && ui?.zip) upsertZipOption(ui.zipId, ui.zip);
         setData(ui);
         setDraft(ui);
       }
@@ -576,7 +586,9 @@ const Profile = () => {
                 title="Zip Code"
                 placeholder="Search Zip Code"
                 options={zipOptions} // [{label, value}]
-                value={draft.zipId} // UUID
+                value={
+                  draft.zipId ? { value: draft.zipId, label: draft.zip } : null
+                }
                 onChange={handleZipChange} // keeps zipId + zip label
                 showSearch
                 allowClear
