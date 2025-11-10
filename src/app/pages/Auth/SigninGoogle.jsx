@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { postApi } from "../../utils/apiService";
 import { GOOGLE_AUTH } from "../../utils/apiPath";
 import { saveAuthToSession } from "../../services/auth";
-import { successToast, errorToast } from "../../services/ToastHelper";
 import Loader from "../../components/Loader/Loader";
+import { errorToast, successToast } from "../../services/ToastHelper";
 
 export default function SigninGoogle() {
   const navigate = useNavigate();
@@ -20,13 +20,13 @@ export default function SigninGoogle() {
 
       if (error) {
         errorToast(error);
-        navigate("/login");
+        navigate("/");
         return;
       }
 
       if (!code) {
         errorToast("Missing authorization code. Please try again.");
-        navigate("/login");
+        navigate("/");
         return;
       }
 
@@ -34,8 +34,7 @@ export default function SigninGoogle() {
         setLoading(true);
         // Call your backend with the code
         const { statusCode, data, message } = await postApi(GOOGLE_AUTH, {
-          code,
-          ...(state ? { state } : {}),
+          code: String(code),
         });
 
         if (statusCode === 200 && data) {
@@ -44,11 +43,11 @@ export default function SigninGoogle() {
           navigate("/patients");
         } else {
           errorToast(message || "Google authentication failed");
-          navigate("/login");
+          navigate("/");
         }
       } catch (e) {
         errorToast("Google Sign-In failed");
-        navigate("/login");
+        navigate("/");
       } finally {
         setLoading(false);
       }

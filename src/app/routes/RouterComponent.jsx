@@ -39,7 +39,7 @@ const RouterComponent = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/signin-google" element={<SigninGoogle />} />
+        <Route path="/updating-status" element={<SigninGoogle />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/verification" element={<Verification />} />
         <Route path="/forgot" element={<Forgot />} />

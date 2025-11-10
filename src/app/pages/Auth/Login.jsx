@@ -87,29 +87,29 @@ export default function Login() {
   };
 
   // STEP 1: Get Google login URL and redirect
-const handleGoogleLogin = async () => {
-  try {
-    setIsLoading(true);
-    const res = await getApi(GOOGLE_LOGIN);
-    const raw = res;
-    const loginUrl =
-      typeof raw === "string"
-        ? raw
-        : raw?.url || raw?.loginUrl || raw?.authorizationUrl;
+  const handleGoogleLogin = async () => {
+    try {
+      setIsLoading(true);
+      const res = await getApi(GOOGLE_LOGIN);
+      const raw = res;
+      const loginUrl =
+        typeof raw === "string"
+          ? raw
+          : raw?.url || raw?.loginUrl || raw?.authorizationUrl;
 
-    if (!loginUrl) {
-      errorToast("Could not start Google Sign-In. Please try again.");
-      return;
+      if (!loginUrl) {
+        errorToast("Could not start Google Sign-In. Please try again.");
+        return;
+      }
+
+      // 🚀 Direct full-page redirect (no popup)
+      window.location.href = loginUrl;
+    } catch (err) {
+      errorToast("Failed to start Google Sign-In");
+    } finally {
+      setIsLoading(false);
     }
-
-    // 🚀 Direct full-page redirect (no popup)
-    window.location.href = loginUrl;
-  } catch (err) {
-    errorToast("Failed to start Google Sign-In");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   return (
     <AuthLayout>
@@ -121,7 +121,6 @@ const handleGoogleLogin = async () => {
           <InputField
             title="Email"
             name="email"
-            type="text"
             value={login.email}
             onChange={handleChange}
             placeholder="Enter your email"

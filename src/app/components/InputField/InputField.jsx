@@ -5,7 +5,7 @@ import { Input } from "antd";
 const InputField = ({
   title,
   helperTitle = "",
-  type,
+  type = "text",
   value,
   onChange,
   name,
