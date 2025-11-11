@@ -21,6 +21,7 @@ export default function SignUp() {
   const [login, setLogin] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -81,6 +82,10 @@ export default function SignUp() {
   };
 
   const handleSubmit = async () => {
+    if (!agreeTerms) {
+      errorToast("Please accept the Terms & Conditions before proceeding.");
+      return;
+    }
     if (validateFields()) {
       setIsLoading(true);
       const payload = {
@@ -193,10 +198,31 @@ export default function SignUp() {
             }}
           />
 
+          <div className="terms-row">
+            <label className="terms-label">
+              <input
+                type="checkbox"
+                checked={agreeTerms}
+                onChange={(e) => setAgreeTerms(e.target.checked)}
+              />
+              <span>
+                I agree to the{" "}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link"
+                >
+                  Terms & Conditions
+                </a>
+              </span>
+            </label>
+          </div>
           <ButtonComponent
             type="submit"
             variant="primary"
             onClick={handleSubmit}
+            disabled={!agreeTerms}
           >
             Send OTP
           </ButtonComponent>

@@ -14,6 +14,7 @@ import AddOrEditPatients from "../pages/User/AddOrEditPatients/AddOrEditPatients
 import PaymentSuccess from "../pages/User/PaymentSuccess/PaymentSuccess";
 import PaymentCancel from "../pages/User/PaymentCancel/PaymentCancel";
 import SigninGoogle from "../pages/Auth/SigninGoogle";
+import Dashboard from "../pages/Admin/Dashboard/Dashboard";
 
 const AppRoutes = () => (
   <Routes>
@@ -24,12 +25,16 @@ const AppRoutes = () => (
         // </ProtectedRoute>
       }
     >
+      //User Routes
       <Route path="/patients" element={<Patients />} />
       <Route path="/add-patients" element={<AddOrEditPatients />} />
       <Route path="/edit-patient/:id" element={<AddOrEditPatients />} />
       <Route path="/subscription" element={<Subscription />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
+
+      //Admin Routes
+      <Route path="/dashboard" element={<Dashboard />} />
     </Route>
   </Routes>
 );

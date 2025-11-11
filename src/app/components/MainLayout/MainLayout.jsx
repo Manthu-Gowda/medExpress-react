@@ -16,35 +16,82 @@ import CardIcon from "../../assets/icons/navbarIcons/CardIcon";
 import PatientsIcon from "../../assets/icons/navbarIcons/PatientsIcon";
 import NavbarIcon from "../../assets/icons/navbarIcons/NavbarIcon";
 import LogoutIcon from "../../assets/icons/navbarIcons/LogoutIcon";
+import DashboardIcon from "../../assets/icons/navbarIcons/DashboardIcon";
+import NotificationSideNavIcon from "../../assets/icons/navbarIcons/NotificationSideNavIcon";
+import MedicalShippersIcon from "../../assets/icons/navbarIcons/MedicalShippersIcon";
+import PendingIcon from "../../assets/icons/navbarIcons/PendingIcon";
+import CustomModal from "../CustomModal/CustomModal";
 
 const { useBreakpoint } = Grid;
 
-const menuItems = [
-  {
-    key: "patients",
-    text: "Patients",
-    icon: <PatientsIcon />,
-    path: "/patients",
-  },
-  {
-    key: "subscription",
-    text: "Subscription",
-    icon: <CardIcon />,
-    path: "/subscription",
-  },
-  { key: "profile", text: "Profile", icon: <ProfileIcon />, path: "/profile" },
-  {
-    key: "settings",
-    text: "Settings",
-    icon: <SettingsIcon />,
-    path: "/settings",
-  },
-];
+const MENUS_BY_ROLE = {
+  User: [
+    {
+      key: "patients",
+      text: "Patients",
+      icon: <PatientsIcon />,
+      path: "/patients",
+    },
+    {
+      key: "subscription",
+      text: "Subscription",
+      icon: <CardIcon />,
+      path: "/subscription",
+    },
+    {
+      key: "profile",
+      text: "Profile",
+      icon: <ProfileIcon />,
+      path: "/profile",
+    },
+    {
+      key: "settings",
+      text: "Settings",
+      icon: <SettingsIcon />,
+      path: "/settings",
+    },
+  ],
+  Admin: [
+    // Example admin menu; adjust to your actual admin routes
+    {
+      key: "dashboard",
+      text: "Dashboard",
+      icon: <DashboardIcon />,
+      path: "/dashboard",
+    },
+    {
+      key: "manage-members",
+      text: "Manage Members",
+      icon: <PatientsIcon />,
+      path: "/manage-members",
+    },
+    {
+      key: "medical-shippers",
+      text: "Manage Medical Shippers",
+      icon: <MedicalShippersIcon />,
+      path: "/medical-shippers",
+    },
+    {
+      key: "profile",
+      text: "Pending Assignees",
+      icon: <PendingIcon />,
+      path: "/pending-assignees",
+    },
+    {
+      key: "notifications",
+      text: "Notifications",
+      icon: <NotificationSideNavIcon />,
+      path: "/notifications",
+    },
+  ],
+};
 
-const BASE_URL = "https://vibhu-solutions.s3.ap-south-1.amazonaws.com/";
+const DEFAULT_MENU = MENUS_BY_ROLE.User;
 
 const MainLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [tick, setTick] = useState(0);
   const screens = useBreakpoint();
   const isPhone = !screens.md;
 
@@ -55,19 +102,33 @@ const MainLayout = () => {
   const userRole = sessionStorage.getItem("role");
 
   useEffect(() => {
+    const refresh = () => setTick((v) => v + 1);
+    window.addEventListener("session-user-updated", refresh);
+    return () => window.removeEventListener("session-user-updated", refresh);
+  }, []);
+
+  useEffect(() => {
     setIsCollapsed(isPhone);
   }, [isPhone]);
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
+  const openLogoutConfirm = () => setShowLogoutModal(true);
+  const closeLogoutConfirm = () => setShowLogoutModal(false);
 
-  const handleLogout = () => {
+  const confirmLogout = () => {
+    // actual logout
     sessionStorage.clear();
+    setShowLogoutModal(false);
     navigate("/");
   };
 
   const handleProfilePage = () => {
     navigate("/profile");
   };
+
+  const menuItems = useMemo(() => {
+    return MENUS_BY_ROLE[userRole] || DEFAULT_MENU;
+  }, [userRole]);
 
   const activeKey = useMemo(
     () =>
@@ -138,7 +199,7 @@ const MainLayout = () => {
             <button
               type="button"
               className="sidebar1_logout_btn"
-              onClick={handleLogout}
+              onClick={openLogoutConfirm}
             >
               <span className="sidebar1_logout_text">Logout</span>
               <span className="sidebar1_logout_icon">
@@ -183,7 +244,11 @@ const MainLayout = () => {
               type="button"
               onClick={handleProfilePage}
             >
-              <img src={userData.profilePicture || DummyUser} alt="User Avatar" className="user_avatar" />
+              <img
+                src={userData.profilePicture || DummyUser}
+                alt="User Avatar"
+                className="user_avatar"
+              />
               <div className="user_meta">
                 <span className="user_name">
                   {userData?.userName || "Guest"}
@@ -201,7 +266,7 @@ const MainLayout = () => {
                 className="icon_btn logout_btn_mobile"
                 aria-label="Logout"
                 type="button"
-                onClick={handleLogout}
+                onClick={openLogoutConfirm}
                 title="Logout"
               >
                 <LogoutIcon />
@@ -239,6 +304,26 @@ const MainLayout = () => {
           </nav>
         )}
       </div>
+
+      <CustomModal
+        open={showLogoutModal}
+        title="Confirm Logout"
+        onClose={closeLogoutConfirm}
+        showPrimary={true}
+        showDanger={true}
+        primaryText="Logout"
+        dangerText="Cancel"
+        onPrimary={confirmLogout}
+        onDanger={closeLogoutConfirm}
+        primaryProps={{ variant: "danger" }} // makes primary look destructive if your Button supports it
+        maskClosable={false}
+        centered
+      >
+        <p style={{ margin: 0 }}>
+          Are you sure you want to logout? You’ll need to sign in again to
+          continue.
+        </p>
+      </CustomModal>
     </div>
   );
 };

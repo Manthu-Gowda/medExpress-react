@@ -21,12 +21,27 @@ import Loader from "../../../components/Loader/Loader";
 import { successToast } from "../../../services/ToastHelper";
 
 const VISA_TYPES = [
-  { value: 1, label: "B1/B2" },
-  { value: 2, label: "H1B" },
-  { value: 3, label: "L1" },
-  { value: 4, label: "F1" },
-  { value: 5, label: "Other" },
+  { value: 1, label: "A" },
+  { value: 2, label: "C" },
+  { value: 3, label: "D" },
+  { value: 4, label: "E1/E2" },
+  { value: 5, label: "EB-1/EB-2/EB-3" },
+  { value: 6, label: "F" },
+  { value: 7, label: "H" },
+  { value: 8, label: "I" },
+  { value: 9, label: "J" },
+  { value: 10, label: "K" },
+  { value: 11, label: "L" },
+  { value: 12, label: "M" },
+  { value: 13, label: "N" },
+  { value: 14, label: "O" },
+  { value: 15, label: "P" },
+  { value: 16, label: "Q" },
+  { value: 17, label: "R" },
+  { value: 18, label: "V" },
+  { value: 19, label: "Other" },
 ];
+
 const VISA_ID_TO_LABEL = Object.fromEntries(
   VISA_TYPES.map((o) => [o.value, o.label])
 );
@@ -257,9 +272,6 @@ const AddOrEditPatients = () => {
     if (!form.street?.trim()) {
       errObj.street = "Street address is required";
     }
-    if (!form.apt?.trim()) {
-      errObj.apt = "Apartment / Unit is required";
-    }
 
     // Passport file (required)
     if (!isEdit) {
@@ -448,25 +460,25 @@ const AddOrEditPatients = () => {
     });
 
   // Normalize one item (File OR {url,fileName,type,size}) to API shape
-const toApiDoc = async (item) => {
-  if (!item) return null;
+  const toApiDoc = async (item) => {
+    if (!item) return null;
 
-  // New upload (File or AntD UploadFile)
-  if (item.originFileObj) {
-    const f = item.originFileObj;
-    const base64 = await fileToBase64(f);
+    // New upload (File or AntD UploadFile)
+    if (item.originFileObj) {
+      const f = item.originFileObj;
+      const base64 = await fileToBase64(f);
+      return {
+        fileName: f.name,
+        url: base64, // or 'base64' if you want to rename key
+      };
+    }
+
+    // Existing file (from patchFormFromApi)
     return {
-      fileName: f.name,
-      url: base64, // or 'base64' if you want to rename key
+      url: item.url,
+      fileName: item.fileName || item.name,
     };
-  }
-
-  // Existing file (from patchFormFromApi)
-  return {
-    url: item.url,
-    fileName: item.fileName || item.name,
   };
-};
 
   // Single-file control -> returns object or null
   const oneToApiDoc = async (arr = []) => {
@@ -701,7 +713,6 @@ const toApiDoc = async (item) => {
             value={form.apt}
             onChange={update("apt")}
             errorText={errors.apt}
-            required
           />
         </div>
 
@@ -740,6 +751,7 @@ const toApiDoc = async (item) => {
               if (f?.length) clearError("prescriptions"); // note the key name
             }}
             required
+            multiple         
             errorText={errors.prescriptions}
           />
         </div>

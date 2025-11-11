@@ -66,25 +66,39 @@ export default function Login() {
     return data;
   };
 
-  const handleSubmit = async () => {
-    if (validateFields()) {
-      setIsLoading(true);
-      const payload = {
-        email: login.email,
-        password: login.password,
-      };
-      const { statusCode, data, message } = await postApi(USER_LOGIN, payload);
-      if (statusCode === 200) {
-        saveAuthToSession(data);
-        setIsLoading(false);
-        successToast("Successfully Logged In");
+const handleSubmit = async () => {
+  if (validateFields()) {
+    setIsLoading(true);
+    const payload = {
+      email: login.email,
+      password: login.password,
+    };
+    
+    const { statusCode, data, message } = await postApi(USER_LOGIN, payload);
+    
+    if (statusCode === 200) {
+      saveAuthToSession(data);
+      setIsLoading(false);
+      successToast("Successfully Logged In");
+
+      // Extract role (either from data.roles or data.role)
+      const role = Array.isArray(data.roles) ? data.roles[0] : data.role;
+
+      // Navigate based on role
+      if (role === "Admin") {
+        navigate("/dashboard");
+      } else if (role === "User") {
         navigate("/patients");
       } else {
-        setIsLoading(false);
-        errorToast(message || "Invalid credentials. Please try again.");
+        navigate("/"); // fallback route if needed
       }
+
+    } else {
+      setIsLoading(false);
+      errorToast(message || "Invalid credentials. Please try again.");
     }
-  };
+  }
+};
 
   // STEP 1: Get Google login URL and redirect
   const handleGoogleLogin = async () => {

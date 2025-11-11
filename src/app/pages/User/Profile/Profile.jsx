@@ -25,14 +25,13 @@ const PLACEHOLDER_AVATAR = DummyUser;
 /** Build a clean 1-line address for the “Location” display */
 const formatAddressLine = ({
   house = "",
-  street = "",
   unit = "",
   city = "",
   state = "",
   zip = "",
   country = "",
 }) => {
-  const line1 = [house, street].filter(Boolean).join(", ");
+  const line1 = [house].filter(Boolean).join(", ");
   const line2 = [unit].filter(Boolean).join(",");
   const line3 = [city, state, zip].filter(Boolean).join(", ");
   const line4 = [country].filter(Boolean).join("");
@@ -61,11 +60,6 @@ const apiToUi = (api) => {
     countryId,
   } = api;
 
-  // naive split of address1 into house/street (non-destructive)
-  const [houseMaybe, ...streetRest] = (address1 || "").split(",");
-  const house = (houseMaybe || "").trim();
-  const street = streetRest.join(",").trim();
-
   const ui = {
     avatar: profilePicture || PLACEHOLDER_AVATAR,
     name: userName || "",
@@ -73,8 +67,7 @@ const apiToUi = (api) => {
     email: email || "",
 
     // granular address
-    house: house || "",
-    street: street || address1 || "",
+    house: address1 || "",
     unit: address2 || "",
     city: cityName || "",
     state: stateName || "",
@@ -91,7 +84,6 @@ const apiToUi = (api) => {
 
   ui.addressLine = formatAddressLine({
     house: ui.house,
-    street: ui.street,
     unit: ui.unit,
     city: ui.city,
     state: ui.state,
@@ -104,7 +96,6 @@ const apiToUi = (api) => {
 
 /** UI → API mapping for update (adjust keys if your backend expects IDs) */
 const uiToApi = (ui) => {
-  const address1 = [ui.house, ui.street].filter(Boolean).join(", ");
   const normalizeAvatar = (v = "") => {
     if (!v) return v;
     if (v.startsWith("data:")) {
@@ -118,7 +109,7 @@ const uiToApi = (ui) => {
     profilePicture: normalizeAvatar(ui.avatar),
     userName: ui.name,
     phoneNumber: ui.phone,
-    address1: address1,
+    address1: ui.house || "",
     address2: ui.unit || "",
     zipCodeId: ui.zipId, // <- ID
     cityId: ui.cityId, // <- ID
@@ -143,7 +134,6 @@ const Profile = () => {
       stateId: undefined,
       countryId: "5f030c51-ae0b-4fd5-8a4c-39f74e63c570", // fixed as you said
       house: "",
-      street: "",
       unit: "",
     }),
     []
@@ -341,7 +331,6 @@ const Profile = () => {
       // keep combined location updated live while editing
       next.addressLine = formatAddressLine({
         house: next.house,
-        street: next.street,
         unit: next.unit,
         city: next.city,
         state: next.state,
@@ -373,17 +362,44 @@ const Profile = () => {
 
       const {
         statusCode,
-        data: resp,
         message,
+        data: apiUser,
       } = await postApi(UPDATE_USER, payload);
 
       if (statusCode === 200) {
         successToast(message || "Profile updated successfully");
-        const fresh = resp?.data ? apiToUi(resp.data) : { ...draft };
+
+        // refresh local UI
+        const fresh = apiToUi(apiUser);
         setData(fresh);
         setDraft(fresh);
         setAvatarFile(null);
         setEdit(false);
+
+        // ✅ update sessionStorage.user (only fields you care about)
+        try {
+          const raw = sessionStorage.getItem("user");
+          const existing = raw ? JSON.parse(raw) : {};
+
+          const updated = {
+            ...existing,
+            // keep existing ids & email as-is; update only these two:
+            userName: apiUser?.userName ?? existing.userName,
+            profilePicture: apiUser?.profilePicture ?? existing.profilePicture,
+
+            // (optional) keep these in sync too if you ever need them)
+            phoneNumber: apiUser?.phoneNumber ?? existing.phoneNumber,
+            emailId: apiUser?.email ?? existing.emailId,
+            userId: existing.userId || apiUser?.id, // preserve your stored key naming
+          };
+
+          sessionStorage.setItem("user", JSON.stringify(updated));
+          window.dispatchEvent(new Event("session-user-updated"));
+          console.log("sessionStorage.user updated:", updated);
+
+        } catch (e) {
+          console.warn("Failed to update sessionStorage.user:", e);
+        }
       } else {
         errorToast("Unable to update profile");
       }
@@ -618,17 +634,10 @@ const Profile = () => {
                 disabled
               />
               <InputField
-                title="House Number"
+                title="House Number & Street Name"
                 name="house"
                 placeholder="Enter House Number"
                 value={draft.house}
-                onChange={onChange}
-              />
-              <InputField
-                title="Street Name"
-                name="street"
-                placeholder="Enter Street Name"
-                value={draft.street}
                 onChange={onChange}
               />
               <InputField

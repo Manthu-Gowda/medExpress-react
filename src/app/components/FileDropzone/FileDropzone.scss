@@ -16,7 +16,9 @@
   &.is-drag {
     border-color: $secondary_text;
     border: 2px dashed #dbe5f2;
-    &:before { border-color: $primary_white; }
+    &:before {
+      border-color: $primary_white;
+    }
   }
 
   &.is-disabled {
@@ -86,13 +88,25 @@
       padding: 0 4px;
       color: #9aa8bd;
       cursor: pointer;
-      &:hover { color: #ff4d4f; }
+      &:hover {
+        color: #ff4d4f;
+      }
     }
   }
+}
+
+.dz-add-more {
+  padding: 5px;
+  border: 1px dashed #b3ceef;
+  background: #fff;
+  margin-top: 5px;
+  border-radius: 6px;
 }
 
 /* Error state keeps parity with .forminput.has-error from InputField.scss */
 .forminput.has-error .filedropzone {
   border-color: red !important;
-  &:before { border-color: red !important; }
+  &:before {
+    border-color: red !important;
+  }
 }

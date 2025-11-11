@@ -67,6 +67,32 @@
     }
   }
 
+  .terms-row {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: $secondary_text;
+    margin-bottom: 5px;
+
+    input[type="checkbox"] {
+      font-size: 18px;
+      accent-color: #0e82fd;
+    }
+
+    .terms-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      a {
+        color: #0e82fd;
+        text-decoration: underline;
+        &:hover {
+          text-decoration-thickness: 2px;
+        }
+      }
+    }
+  }
+
   .g-icon {
     width: 18px;
     height: 18px;
