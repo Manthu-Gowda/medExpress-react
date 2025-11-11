@@ -152,6 +152,8 @@ const Profile = () => {
   const abortRef = useRef(null);
   const cacheRef = useRef(new Map());
   const cityStateAbortRef = useRef(null);
+  const requestIdRef = useRef(0);
+  const MIN_ZIP_CHARS = 3;
 
   const upsertZipOption = (id, label) => {
     if (!id || !label) return;
@@ -223,14 +225,7 @@ const Profile = () => {
       setZipOptions(cacheRef.current.get(q));
       return;
     }
-
-    // 2) Cancel any previous request
-    cancelInFlight();
-
-    // 3) Fire a new request
-    const controller = new AbortController();
-    abortRef.current = controller;
-
+    const myId = ++requestIdRef.current;
     setZipLoading(true);
     try {
       const payload = {
@@ -238,49 +233,51 @@ const Profile = () => {
         pageIndex: 1,
         pageSize: 20,
       };
-      const { statusCode, data } = await postApi(GET_ALL_ZIPCODE, payload, {
-        signal: controller.signal,
-      });
+      const { statusCode, data } = await postApi(GET_ALL_ZIPCODE, payload);
 
       const options = statusCode === 200 && Array.isArray(data) ? data : [];
-      setZipOptions(options);
-      cacheRef.current.set(q, options); // cache result
-    } catch (err) {
-      if (err?.name !== "AbortError") {
-        console.error("Zip fetch error:", err);
-        setZipOptions([]);
+      if (myId === requestIdRef.current) {
+        setZipOptions(options);
+        cacheRef.current.set(q, options);
       }
+    } catch (err) {
+      console.error("Zip fetch error:", err);
+      if (myId === requestIdRef.current) setZipOptions([]);
     } finally {
-      setZipLoading(false);
-      abortRef.current = null;
+      if (myId === requestIdRef.current) setZipLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchZipCodes("");
-    return () => cancelInFlight();
-  }, []);
+  useEffect(() => () => cancelInFlight(), []);
 
-  const handleZipSearch = (input) => {
-    runDebounced(() => fetchZipCodes(input), 250);
+  const handleZipSearch = (input = "") => {
+    const q = String(input).trim();
+    if (q.length < MIN_ZIP_CHARS) {
+      cancelInFlight();
+      setZipOptions([]);
+      setZipLoading(false);
+      return;
+    }
+    runDebounced(() => fetchZipCodes(q), 300);
   };
 
   const handleZipFocus = () => {
-    // prefetch if nothing loaded yet
     if (!zipOptions.length) fetchZipCodes("");
   };
 
   const handleZipChange = (value, option) => {
+    const id = value;
+    const label = option?.label ?? "";
     setDraft((p) => ({
       ...p,
-      zipId: value,
-      zip: option?.label || "",
+      zipId: id,
+      zip: label,
       city: "",
       state: "",
       cityId: undefined,
       stateId: undefined,
     }));
-    if (value) fetchStateAndCityByZipCode(value);
+    if (id) fetchStateAndCityByZipCode(id);
   };
 
   const handleZipClear = () => {
@@ -396,7 +393,6 @@ const Profile = () => {
           sessionStorage.setItem("user", JSON.stringify(updated));
           window.dispatchEvent(new Event("session-user-updated"));
           console.log("sessionStorage.user updated:", updated);
-
         } catch (e) {
           console.warn("Failed to update sessionStorage.user:", e);
         }
@@ -602,9 +598,7 @@ const Profile = () => {
                 title="Zip Code"
                 placeholder="Search Zip Code"
                 options={zipOptions} // [{label, value}]
-                value={
-                  draft.zipId ? { value: draft.zipId, label: draft.zip } : null
-                }
+                value={draft.zipId ?? null}
                 onChange={handleZipChange} // keeps zipId + zip label
                 showSearch
                 allowClear
@@ -620,7 +614,7 @@ const Profile = () => {
               <InputField
                 title="City"
                 name="city"
-                placeholder="Current City"
+                placeholder="City"
                 value={draft.city}
                 onChange={onChange}
                 disabled
@@ -628,7 +622,7 @@ const Profile = () => {
               <InputField
                 title="State"
                 name="state"
-                placeholder="Current State"
+                placeholder="State"
                 value={draft.state}
                 onChange={onChange}
                 disabled

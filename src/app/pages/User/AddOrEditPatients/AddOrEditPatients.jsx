@@ -18,7 +18,7 @@ import {
 } from "../../../utils/apiPath";
 import { getApi, postApi, putApi } from "../../../utils/apiService";
 import Loader from "../../../components/Loader/Loader";
-import { successToast } from "../../../services/ToastHelper";
+import { errorToast, successToast } from "../../../services/ToastHelper";
 
 const VISA_TYPES = [
   { value: 1, label: "A" },
@@ -117,6 +117,7 @@ const AddOrEditPatients = () => {
   const abortRef = useRef(null);
   const cacheRef = useRef(new Map());
   const cityStateAbortRef = useRef(null);
+  const requestIdRef = useRef(0);
 
   const upsertZipOption = (id, label) => {
     if (!id || !label) return;
@@ -189,7 +190,7 @@ const AddOrEditPatients = () => {
     });
 
     if (data?.zipCodeId) {
-      const label = data?.zip || ""; // if your API returns 'zip' text
+      const label = data?.zipCode || ""; // <-- correct source for label
       upsertZipOption(data.zipCodeId, label);
     }
 
@@ -360,12 +361,8 @@ const AddOrEditPatients = () => {
       return;
     }
 
-    // 2) Cancel any previous request
-    cancelInFlight();
-
-    // 3) Fire a new request
-    const controller = new AbortController();
-    abortRef.current = controller;
+    // assign an id to this request
+    const myId = ++requestIdRef.current;
 
     setZipLoading(true);
     try {
@@ -374,28 +371,21 @@ const AddOrEditPatients = () => {
         pageIndex: 1,
         pageSize: 20,
       };
-      const { statusCode, data } = await postApi(GET_ALL_ZIPCODE, payload, {
-        signal: controller.signal,
-      });
-
+      const { statusCode, data } = await postApi(GET_ALL_ZIPCODE, payload);
       const options = statusCode === 200 && Array.isArray(data) ? data : [];
-      setZipOptions(options);
-      cacheRef.current.set(q, options); // cache result
-    } catch (err) {
-      if (err?.name !== "AbortError") {
-        console.error("Zip fetch error:", err);
-        setZipOptions([]);
+      if (myId === requestIdRef.current) {
+        setZipOptions(options);
+        cacheRef.current.set(q, options);
       }
+    } catch (err) {
+      console.error("Zip fetch error:", err);
+      if (myId === requestIdRef.current) setZipOptions([]);
     } finally {
-      setZipLoading(false);
-      abortRef.current = null;
+      if (myId === requestIdRef.current) setZipLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchZipCodes("");
-    return () => cancelInFlight();
-  }, []);
+  useEffect(() => () => cancelInFlight(), []);
 
   useEffect(() => {
     if (!isEdit) return;
@@ -414,8 +404,17 @@ const AddOrEditPatients = () => {
     })();
   }, [isEdit, id]);
 
-  const handleZipSearch = (input) => {
-    runDebounced(() => fetchZipCodes(input), 250);
+  const MIN_ZIP_CHARS = 3;
+  const handleZipSearch = (input = "") => {
+    const q = String(input).trim();
+    // if user erased or < 3 chars, clear list and cancel in-flight
+    if (q.length < MIN_ZIP_CHARS) {
+      cancelInFlight();
+      setZipOptions([]);
+      setZipLoading(false);
+      return;
+    }
+    runDebounced(() => fetchZipCodes(q), 300);
   };
 
   const handleZipFocus = () => {
@@ -423,17 +422,21 @@ const AddOrEditPatients = () => {
     if (!zipOptions.length) fetchZipCodes("");
   };
 
-  const handleZipChange = (value, option) => {
+  const handleZipChange = (v, option) => {
+    const isObj = v && typeof v === "object";
+    const id = isObj ? v.value : v;
+    const label = isObj ? v.label : option?.label;
+
     setForm((p) => ({
       ...p,
-      zipCodeId: value,
-      zip: option?.label || "",
+      zipCodeId: id,
+      zip: label || "",
       city: "",
       state: "",
       cityId: undefined,
       stateId: undefined,
     }));
-    if (value) fetchStateAndCityByZipCode(value);
+    if (id) fetchStateAndCityByZipCode(id);
   };
 
   const handleZipClear = () => {
@@ -665,9 +668,7 @@ const AddOrEditPatients = () => {
             title="Zip Code"
             placeholder="Search Zip Code"
             options={zipOptions} // [{label, value}]
-            value={
-              form.zipCodeId ? { value: form.zipCodeId, label: form.zip } : null
-            }
+            value={form.zipCodeId ?? null}
             onChange={handleZipChange} // keeps zipCodeId + zip label
             showSearch
             allowClear
@@ -683,7 +684,7 @@ const AddOrEditPatients = () => {
           />
           <InputField
             title="City"
-            placeholder="Current City"
+            placeholder="City"
             value={form.city}
             onChange={update("city")}
             disabled
@@ -692,7 +693,7 @@ const AddOrEditPatients = () => {
           />
           <InputField
             title="State"
-            placeholder="Current State"
+            placeholder="State"
             value={form.state}
             onChange={update("state")}
             disabled
@@ -751,7 +752,7 @@ const AddOrEditPatients = () => {
               if (f?.length) clearError("prescriptions"); // note the key name
             }}
             required
-            multiple         
+            multiple
             errorText={errors.prescriptions}
           />
         </div>
