@@ -1,0 +1,38 @@
+@use "../../../globalStyles" as *;
+
+.ns {
+  .appModal__header {
+    border-bottom: 1px solid $primary_border;
+    padding-bottom: 8px;
+  }
+  .appModal__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: $primary_text;
+  }
+}
+
+.ns__body {
+  padding: 12px 20px 4px;
+}
+
+.ns__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 680px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// .forminput .input {
+//   height: 40px;
+//   border-radius: 10px;
+//   border: 1px solid $primary_border;
+//   background: $primary_white;
+// }
+// .input-label {
+//   font-weight: 700;
+//   color: $primary_text;
+// }

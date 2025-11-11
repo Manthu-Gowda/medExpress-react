@@ -1,0 +1,94 @@
+@use "../../../globalStyles" as *;
+
+/* toggle */
+.subToggle {
+  display: inline-flex;
+  gap: 8px;
+  background: $primary_bg;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid $primary_border;
+  margin: 8px 0 12px;
+
+  &__btn {
+    min-width: 180px;
+    height: 40px;
+    border-radius: 8px;
+    padding: 0 14px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: $secondary_text;
+    font-weight: 700;
+
+    &.is-active {
+      background: $primary_white;
+      color: $primary_text;
+      border-color: $primary_border;
+      box-shadow: 0 1px 0 rgba($primary_text, 0.04);
+    }
+  }
+}
+
+.pa_sec {
+  .ant-table-container {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid $primary_border;
+  }
+  .ant-table {
+    background: $primary_white;
+  }
+  .ant-table-thead > tr > th {
+    background: $primary_bg;
+    color: $secondary_text;
+    font-weight: 600;
+    border-bottom: 1px solid $primary_border;
+    padding: 14px 16px;
+  }
+  .ant-table-tbody > tr > td {
+    padding: 14px 16px;
+    border-bottom: 1px solid $primary_border;
+    color: $primary_text;
+  }
+  .ant-table-tbody > tr:hover > td {
+    background: rgba($brand_color, 0.04);
+  }
+}
+
+.pa__link {
+  all: unset;
+  color: $brand_color;
+  cursor: pointer;
+  font-weight: 600;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+.pa__muted {
+  color: $secondary_text;
+}
+.pa__strong {
+  color: $primary_text;
+  font-weight: 600;
+}
+
+.pa__docBadge {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: $primary_bg;
+  border: 1px solid $primary_border;
+  color: $primary_text;
+}
+
+.pa__assignBtn {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: #20c05c;
+  color: $primary_white;
+  font-weight: 700;
+  border: none;
+}

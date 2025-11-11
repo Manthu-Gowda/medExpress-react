@@ -15,6 +15,10 @@ import PaymentSuccess from "../pages/User/PaymentSuccess/PaymentSuccess";
 import PaymentCancel from "../pages/User/PaymentCancel/PaymentCancel";
 import SigninGoogle from "../pages/Auth/SigninGoogle";
 import Dashboard from "../pages/Admin/Dashboard/Dashboard";
+import ManageMembers from "../pages/Admin/ManageMembers/ManageMembers";
+import MedicalShippers from "../pages/Admin/MedicalShippers/MedicalShippers";
+import PendingAssignees from "../pages/Admin/PendingAssignees/PendingAssignees";
+import Notifications from "../pages/Admin/Notifications/Notifications";
 
 const AppRoutes = () => (
   <Routes>
@@ -32,9 +36,12 @@ const AppRoutes = () => (
       <Route path="/subscription" element={<Subscription />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
-
       //Admin Routes
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/manage-members" element={<ManageMembers />} />
+      <Route path="/medical-shippers" element={<MedicalShippers />} />
+      <Route path="/pending-assignees" element={<PendingAssignees />} />
+      <Route path="/notifications" element={<Notifications />} />
     </Route>
   </Routes>
 );

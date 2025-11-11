@@ -1,0 +1,102 @@
+@use "../../../globalStyles" as *;
+
+
+.notification__panel {
+  background: $primary_white;
+  border: 1px solid $primary_border;
+  border-radius: 16px;
+  padding: 0 8px;
+}
+
+/* Row */
+.notifRow {
+  display: grid;
+  grid-template-columns: 56px 1fr 120px;
+  gap: 12px;
+  padding: 14px 8px;
+  position: relative;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba($brand_color, 0.04);
+  }
+
+  &__avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    object-fit: cover;
+  }
+
+  &__content {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+    padding-right: 8px;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  &__name {
+    font-weight: 800;
+    color: $primary_text;
+  }
+
+  &__badge {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba($brand_color, 0.25);
+    background: rgba($brand_color, 0.12);
+    color: $brand_color;
+
+    &.is-member { /* same style; keep hook if later differs */ }
+    &.is-shipper { /* same style; keep hook if later differs */ }
+  }
+
+  &__body {
+    margin: 0;
+    color: $secondary_text;
+  }
+
+  &__meta {
+    display: grid;
+    justify-items: end;
+    align-content: space-between;
+    padding: 4px 0;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    background: $brand_color;
+    border-radius: 50%;
+    justify-self: end;
+    margin-top: 4px;
+  }
+
+  &__time {
+    color: $secondary_text;
+  }
+
+  &__divider {
+    position: absolute;
+    left: 56px;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: $primary_border;
+  }
+}
+
+/* Unread emphasis (optional bolder name) */
+.is-unread .notifRow__name {
+  color: $primary_text;
+}

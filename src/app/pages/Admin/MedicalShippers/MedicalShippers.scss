@@ -1,0 +1,73 @@
+@use "../../../globalStyles" as *;
+
+.ms {
+  &_sec {
+    .ant-table-container {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid $primary_border;
+    }
+
+    .ant-table {
+      background: $primary_white;
+    }
+
+    .ant-table-thead > tr > th {
+      background: $primary_bg;
+      color: $secondary_text;
+      font-weight: 600;
+      border-bottom: 1px solid $primary_border;
+      padding: 14px 16px;
+    }
+
+    .ant-table-tbody > tr > td {
+      padding: 14px 16px;
+      border-bottom: 1px solid $primary_border;
+      color: $primary_text;
+      vertical-align: middle;
+    }
+
+    .ant-table-tbody > tr:hover > td {
+      background: rgba($brand_color, 0.04);
+    }
+
+    .ms__link {
+      all: unset;
+      color: $brand_color;
+      cursor: pointer;
+      font-weight: 600;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .ms__muted {
+      color: $secondary_text;
+    }
+    .ms__strong {
+      color: $primary_text;
+      font-weight: 600;
+    }
+
+    .ant-pagination {
+      margin: 12px 8px;
+    }
+    .ant-pagination-item {
+      border-radius: 6px;
+      border: 1px solid $primary_border;
+    }
+    .ant-pagination-item-active {
+      background: $brand_color;
+      border-color: $brand_color;
+      a {
+        color: $primary_white !important;
+      }
+    }
+    .ant-pagination-prev .ant-pagination-item-link,
+    .ant-pagination-next .ant-pagination-item-link {
+      border-radius: 6px;
+      border: 1px solid $primary_border;
+      color: $brand_color;
+    }
+  }
+}

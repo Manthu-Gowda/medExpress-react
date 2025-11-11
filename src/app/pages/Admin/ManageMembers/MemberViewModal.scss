@@ -1,0 +1,193 @@
+@use "../../../globalStyles" as *;
+
+.mv {
+  // modal header (from CustomModal)
+  .appModal__header {
+    border-bottom: 1px solid $primary_border;
+    padding-bottom: 8px;
+  }
+
+  .appModal__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: $primary_text;
+  }
+
+  .appModal__body {
+    background: $primary_white;
+  }
+}
+
+.mv__body {
+  padding: 8px 8px 16px;
+}
+
+.mv__section + .mv__section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid $primary_border;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.mv__sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 6px 10px;
+}
+
+.mv__sectionTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: $primary_text;
+}
+
+.mv__sectionActions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Member card */
+.mv__memberCard {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 14px;
+  background: $primary_bg;
+  border: 1px solid $primary_border;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.mv__memberAvatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.mv__memberMeta {
+  display: grid;
+  gap: 4px;
+  align-content: center;
+}
+.mv__memberName {
+  font-size: 20px;
+  font-weight: 800;
+  color: $primary_text;
+}
+.mv__muted {
+  color: $secondary_text;
+}
+
+/* Patients grid */
+.mv__patientGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mv__patientCard {
+  background: $primary_white;
+  border: 1px solid $primary_border;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 1px 0 rgba($primary_text, 0.02);
+}
+
+.mv__patientHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.mv__patientLeft {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.mv__patientAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.mv__patientName {
+  font-weight: 700;
+  color: $primary_text;
+}
+.mv__phone {
+  color: $brand_color;
+  font-weight: 600;
+}
+
+.mv__address {
+  color: $secondary_text;
+  margin: 8px 0 12px;
+  line-height: 1.4;
+  border-bottom: 1px solid $primary_border;
+  padding-bottom: 12px;
+}
+
+.mv__kv {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.mv__strong {
+  color: $primary_text;
+  font-weight: 600;
+}
+
+/* Small round icon buttons */
+.mv__iconBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba($brand_color, 0.12);
+  border: 1px solid rgba($brand_color, 0.28);
+  color: $brand_color;
+  line-height: 0;
+
+  &--danger {
+    background: rgba(255, 77, 79, 0.12);
+    border-color: rgba(255, 77, 79, 0.28);
+    color: #ff4d4f;
+  }
+}
+
+/* CTA buttons inside card */
+.mv__ctaRow {
+  display: flex;
+  gap: 10px;
+}
+.mv__btn {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  border: 1px solid $primary_border;
+  background: $primary_white;
+  color: $primary_text;
+
+  &--ghost {
+    background: $primary_white;
+  }
+  &--primary {
+    background: $brand_color;
+    border-color: $brand_color;
+    color: $primary_white;
+  }
+}
