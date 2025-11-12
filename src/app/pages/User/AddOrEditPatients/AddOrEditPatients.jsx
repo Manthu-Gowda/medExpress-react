@@ -454,47 +454,69 @@ const AddOrEditPatients = () => {
   // ===== helpers: put above handleSubmit =====
 
   // Turn "File" into { fileName, base64 }
+  // Convert a File into a base64 string (without data: prefix)
   const fileToBase64 = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+      reader.onload = () => resolve(String(reader.result).split(",")[1] || "");
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
 
-  // Normalize one item (File OR {url,fileName,type,size}) to API shape
+  const hasNonEmptyUrl = (u) => typeof u === "string" && u.trim().length > 0;
+
+  // Try to pull the underlying File object from various possible shapes
+  const extractRawFile = (item) => {
+    if (!item) return null;
+    if (item.originFileObj instanceof File) return item.originFileObj;
+    if (item.file instanceof File) return item.file;
+    if (item.raw instanceof File) return item.raw;
+    if (item.blobFile instanceof File) return item.blobFile;
+    if (item instanceof File) return item;
+    return null;
+  };
+
+  // Normalize one item to { url, fileName } or return null if not usable
   const toApiDoc = async (item) => {
     if (!item) return null;
 
-    // New upload (File or AntD UploadFile)
-    if (item.originFileObj) {
-      const f = item.originFileObj;
-      const base64 = await fileToBase64(f);
+    // Existing uploaded file with a valid URL
+    if (hasNonEmptyUrl(item.url)) {
       return {
-        fileName: f.name,
-        url: base64, // or 'base64' if you want to rename key
+        url: item.url,
+        fileName: item.fileName || item.name || "document",
       };
     }
 
-    // Existing file (from patchFormFromApi)
-    return {
-      url: item.url,
-      fileName: item.fileName || item.name,
-    };
+    // Newly uploaded file -> convert to base64
+    const raw = extractRawFile(item);
+    if (raw) {
+      const base64 = await fileToBase64(raw);
+      return {
+        url: base64,
+        fileName: item.fileName || item.name || raw.name || "document",
+      };
+    }
+
+    // Nothing usable -> skip
+    return null;
   };
 
-  // Single-file control -> returns object or null
+  // Handle a single-file control (returns one object or null)
   const oneToApiDoc = async (arr = []) => {
     if (!Array.isArray(arr) || !arr.length) return null;
     return await toApiDoc(arr[0]);
   };
 
-  // Multi-file control -> returns array of objects or null
+  // Handle multi-file control (returns array or null)
   const manyToApiDocs = async (arr = []) => {
     if (!Array.isArray(arr) || !arr.length) return null;
     const out = [];
-    for (const it of arr) out.push(await toApiDoc(it));
-    return out;
+    for (const it of arr) {
+      const doc = await toApiDoc(it);
+      if (doc) out.push(doc);
+    }
+    return out.length ? out : null;
   };
 
   const encodeOne = async (arr = []) => {
@@ -521,6 +543,12 @@ const AddOrEditPatients = () => {
       const passport = await oneToApiDoc(files.passport);
       const visa = await oneToApiDoc(files.visa);
       const prescriptions = await manyToApiDocs(files.prescription);
+
+      if (!prescriptions) {
+        errorToast("Please attach at least one valid prescription file.");
+        setIsLoading(false);
+        return;
+      }
       const payload = {
         // names & contacts
         name: form.patientName?.trim(),

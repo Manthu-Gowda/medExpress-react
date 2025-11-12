@@ -40,8 +40,9 @@
   &__label {
     font-size: 14px;
     color: $secondary_text;
-    text-align: center;                 // center like mock
+    text-align: right;                 // center like mock
     letter-spacing: 0.2px;
+    margin-bottom: 10px;
   }
 
   &__value {

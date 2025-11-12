@@ -34,6 +34,15 @@ export const ADD_SUBSCRIPTIONS = "user/Subscriptions/AddSubscription";
 export const GET_ALL_UNSUBSCRIBED_PATIENTS = "user/Subscriptions/GetUnSubscribedPatients";
 
 
+//Admin API's
+//Dashboard
+export const GET_DASHBOARD_DATA = "admin/Dashboard/GetDashboard";
+
+//Members
+export const GET_MEMBERS_DATA = "admin/Members/GetMembers";
+export const GET_MEMBER_DATA = "admin/Members/GetMember";
+
+
 
 
 

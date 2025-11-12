@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import PropTypes from "prop-types";
-import { Modal, Image } from "antd";
+import { Modal, Image, Popover } from "antd";
 import "./PatientCard.scss";
 import EditIcon from "../../assets/icons/EditIcon";
 import EyeIcon from "../../assets/icons/EyeIcon";
@@ -66,6 +66,32 @@ const stop = (fn) => (e) => {
   fn?.();
 };
 
+// Normalize prescriptions into [{ url, name }]
+const normalizeDocs = (value) => {
+  // support: array of objects, array of strings, string, single object
+  const arr = Array.isArray(value) ? value : value ? [value] : [];
+  return arr
+    .map((it, idx) => {
+      if (!it) return null;
+      if (typeof it === "string") {
+        const u = it.trim();
+        if (!u) return null;
+        return { url: u, name: `File ${idx + 1}` };
+      }
+      if (typeof it === "object") {
+        const url =
+          (typeof it.url === "string" && it.url.trim()) ||
+          (typeof it.href === "string" && it.href.trim()) ||
+          "";
+        if (!url) return null;
+        const name = it.fileName || it.name || `File ${idx + 1}`;
+        return { url, name };
+      }
+      return null;
+    })
+    .filter(Boolean);
+};
+
 /** ---- component ---- */
 const PatientCard = ({
   data,
@@ -96,21 +122,23 @@ const PatientCard = ({
     prescriptions,
   } = data || {};
 
-  const addressLine = joinAddress(
-    address1,
-    address2,
-    cityName,
-    stateName,
-    countryName
-  );
+  const addressLine = [address1, address2, cityName, stateName, countryName]
+    .map((p) => (typeof p === "string" ? p.trim() : p))
+    .filter(Boolean)
+    .join(", ");
 
   // Modal state
   const [imgModalOpen, setImgModalOpen] = useState(false);
   const [imgList, setImgList] = useState([]); // array of image URLs
   const [imgStartIndex, setImgStartIndex] = useState(0);
   const [pdfList, setPdfList] = useState([]);
-
+  const [prescPopoverOpen, setPrescPopoverOpen] = useState(false);
   const openNewTab = (url) => window.open(url, "_blank", "noopener,noreferrer");
+
+  const prescriptionDocs = useMemo(
+    () => normalizeDocs(prescriptions),
+    [prescriptions]
+  );
 
   // Build a preview for images (and collect pdfs optionally)
   const openPreview = (images = [], pdfs = []) => {
@@ -155,14 +183,54 @@ const PatientCard = ({
   const handleOpenPrescriptions = () => {
     if (onPrescriptions) return onPrescriptions(data);
 
-    const items = toUrlArray(prescriptions);
-    const images = items.filter(isImageUrl);
-    const pdfs = items.filter(isPdfUrl);
-    const others = items.filter((u) => !isImageUrl(u) && !isPdfUrl(u));
+    // If no files, do nothing
+    if (!prescriptionDocs || prescriptionDocs.length === 0) return;
 
-    if (images.length) openPreview(images, pdfs);
-    if (pdfs.length && !images.length) pdfs.forEach((p) => openNewTab(p));
-    if (others.length && !images.length) others.forEach((o) => openNewTab(o));
+    // If exactly one file, just open it
+    if (prescriptionDocs.length === 1) {
+      openNewTab(prescriptionDocs[0].url);
+      return;
+    }
+
+    // Multiple files -> open Popover
+    setPrescPopoverOpen(true);
+  };
+
+  const closePrescPopover = () => setPrescPopoverOpen(false);
+
+  const prescPopoverContent = (
+    <div style={{ minWidth: 260 }}>
+      <div style={{ fontWeight: 600, marginBottom: 8 }}>Prescriptions</div>
+      <ul
+        style={{ paddingLeft: 18, margin: 0, maxHeight: 240, overflow: "auto" }}
+      >
+        {prescriptionDocs.map((doc, idx) => (
+          <li key={doc.url + idx} style={{ marginBottom: 6 }}>
+            <a
+              href={doc.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openNewTab(doc.url);
+                closePrescPopover();
+              }}
+              title={doc.name}
+              style={{ wordBreak: "break-all" }}
+            >
+              {doc.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+
+  const stop = (fn) => (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    fn?.();
   };
 
   return (
@@ -206,9 +274,18 @@ const PatientCard = ({
             <EyeIcon /> <span>Passport</span>
           </ButtonComponent>
 
-          <ButtonComponent onClick={stop(handleOpenPrescriptions)}>
-            <EyeIcon fillColor="#FFFFFF" /> <span>Prescriptions</span>
-          </ButtonComponent>
+          <Popover
+            trigger="click"
+            placement="bottomRight"
+            open={prescPopoverOpen}
+            onOpenChange={(v) => setPrescPopoverOpen(v)}
+            content={prescriptionDocs.length > 1 ? prescPopoverContent : null}
+            destroyTooltipOnHide
+          >
+            <ButtonComponent onClick={stop(handleOpenPrescriptions)}>
+              <EyeIcon fillColor="#FFFFFF" /> <span>Prescriptions</span>
+            </ButtonComponent>
+          </Popover>
         </footer>
       </article>
 
