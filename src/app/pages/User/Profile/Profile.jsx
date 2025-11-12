@@ -19,6 +19,7 @@ import { successToast, errorToast } from "../../../services/ToastHelper";
 import Loader from "../../../components/Loader/Loader";
 import SelectInput from "../../../components/SelectInput/SelectInput";
 import DummyUser from "../../../assets/SampleUser.jpg";
+import PhoneField from "../../../components/InputField/PhoneField";
 
 const PLACEHOLDER_AVATAR = DummyUser;
 
@@ -48,6 +49,7 @@ const apiToUi = (api) => {
     userName,
     email,
     phoneNumber,
+    countryCode,
     address1,
     address2,
     zipCode,
@@ -64,6 +66,7 @@ const apiToUi = (api) => {
     avatar: profilePicture || PLACEHOLDER_AVATAR,
     name: userName || "",
     phone: phoneNumber || "",
+    phoneCountryCode: countryCode || "+1",
     email: email || "",
 
     // granular address
@@ -108,7 +111,8 @@ const uiToApi = (ui) => {
   return {
     profilePicture: normalizeAvatar(ui.avatar),
     userName: ui.name,
-    phoneNumber: ui.phone,
+    countryCode: ui.phoneCountryCode || "+1", // <--- NEW
+    phoneNumber: String(ui.phone || "").replace(/\D+/g, ""), // digits only
     address1: ui.house || "",
     address2: ui.unit || "",
     zipCodeId: ui.zipId, // <- ID
@@ -124,6 +128,7 @@ const Profile = () => {
       avatar: PLACEHOLDER_AVATAR,
       name: "",
       phone: "",
+      phoneCountryCode: "+1", // <--- NEW
       email: "",
       addressLine: "",
       zip: "",
@@ -560,12 +565,15 @@ const Profile = () => {
                 onChange={onChange}
               />
 
-              <InputField
+              <PhoneField
                 title="Phone Number"
-                name="phone"
-                placeholder="Enter Phone Number"
+                required
                 value={draft.phone}
-                onChange={onChange}
+                countryCode={draft.phoneCountryCode || "+1"}
+                onChangeCountry={(val) =>
+                  setDraft((p) => ({ ...p, phoneCountryCode: val }))
+                }
+                onChangePhone={(val) => setDraft((p) => ({ ...p, phone: val }))}
               />
 
               <InputField
