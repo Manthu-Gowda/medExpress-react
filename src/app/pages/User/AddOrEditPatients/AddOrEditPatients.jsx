@@ -74,8 +74,6 @@ const initialErrors = {
 
 const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
-const phoneRe = /^[0-9+\-() ]{7,15}$/; // replace if you want stricter E.164
-
 const isFuture = (d) => dayjs(d).isAfter(dayjs(), "day");
 const isPast = (d) => dayjs(d).isBefore(dayjs(), "day");
 
@@ -145,6 +143,7 @@ const AddOrEditPatients = () => {
       ...p,
       patientName: data?.name ?? "",
       phone: data?.phoneNumber ?? "",
+      phoneCountryCode: data?.countryCode ?? "",
       email: data?.email ?? "",
       dob: data?.dateOfBirth ? dayjs(data.dateOfBirth) : null,
 

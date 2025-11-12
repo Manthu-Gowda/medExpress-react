@@ -546,7 +546,7 @@ const Profile = () => {
             </div>
             <div className="piCol">
               <div className="piLabel">Phone Number</div>
-              <div className="piValue accent">{data.phone || "-"}</div>
+              <div className="piValue accent">{data.phoneCountryCode + " " + data.phone || "-"}</div>
             </div>
             <div className="piCol">
               <div className="piLabel">Email</div>

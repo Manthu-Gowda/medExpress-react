@@ -105,6 +105,7 @@ const PatientCard = ({
   const {
     name,
     phoneNumber,
+    countryCode,
     email,
     dateOfBirth,
     visaTypeName,
@@ -253,7 +254,7 @@ const PatientCard = ({
         </header>
 
         <div className="pc__body">
-          <Row label="Ph No:" value={phoneNumber} />
+          <Row label="Ph No:" value={countryCode + "  " + phoneNumber} />
           <Row label="E Mail:" value={email} />
           <Row label="DOB:" value={dateOfBirth} />
           <Row label="Visa Type:" value={visaTypeName} />
