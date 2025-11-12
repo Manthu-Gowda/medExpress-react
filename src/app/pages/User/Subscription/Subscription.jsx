@@ -69,7 +69,7 @@ const Subscription = () => {
         key: "patient",
         render: (t) => <span className="text-ellipsis">{t}</span>,
       },
-      { title: "Subscribed Date", dataIndex: "date", key: "date", width: 220 },
+      { title: "Order Date", dataIndex: "date", key: "date", width: 220 },
     ],
     []
   );
@@ -209,7 +209,7 @@ const Subscription = () => {
   return (
     <div className="subscription">
       {isLoading && <Loader />}
-      <SubHeader title="Subscription" showBack={false} showRight={false} />
+      <SubHeader title="Orders" showBack={false} showRight={false} />
 
       <section className="subscription_sec">
         {/* Plan Banner */}
@@ -243,7 +243,7 @@ const Subscription = () => {
               onClick={onSubscribeClick} // <-- fetch patients + open modal
               disabled={!plan?.id}
             >
-              Subscribe
+              Place Order
             </Button>
           </div>
         </div>
@@ -254,7 +254,7 @@ const Subscription = () => {
             className={`subToggle__btn ${tab === "active" ? "is-active" : ""}`}
             onClick={() => setTab("active")}
           >
-            Active Subscription
+            Active Orders
           </button>
           <button
             className={`subToggle__btn ${
@@ -262,7 +262,7 @@ const Subscription = () => {
             }`}
             onClick={() => setTab("previous")}
           >
-            Previous Subscription
+            Previous Orders
           </button>
         </div>
 
@@ -290,7 +290,7 @@ const Subscription = () => {
       {/* Modal with multi-select */}
       <CustomModal
         open={open}
-        title="Subscription"
+        title="Orders"
         onClose={() => setOpen(false)}
         primaryText="Pay Now"
         dangerText="Cancel"
@@ -301,7 +301,7 @@ const Subscription = () => {
         }}
       >
         <p style={{ marginBottom: 12, color: "#012047", fontWeight: 600 }}>
-          Select a Patient for Subscription
+          Select a Patient for Order
         </p>
 
         {patientsLoading && <div style={{ padding: 8 }}>Loading patients…</div>}

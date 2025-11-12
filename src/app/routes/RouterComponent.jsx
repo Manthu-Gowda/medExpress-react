@@ -7,7 +7,6 @@ import SignUp from "../pages/Auth/Signup";
 import Forgot from "../pages/Auth/Forgot";
 import Reset from "../pages/Auth/Reset";
 import Verification from "../pages/Auth/verification";
-import Subscription from "../pages/User/Subscription/Subscription";
 import Profile from "../pages/User/Profile/Profile";
 import Settings from "../pages/User/Settings/Settings";
 import AddOrEditPatients from "../pages/User/AddOrEditPatients/AddOrEditPatients";
@@ -19,21 +18,22 @@ import ManageMembers from "../pages/Admin/ManageMembers/ManageMembers";
 import MedicalShippers from "../pages/Admin/MedicalShippers/MedicalShippers";
 import PendingAssignees from "../pages/Admin/PendingAssignees/PendingAssignees";
 import Notifications from "../pages/Admin/Notifications/Notifications";
+import Subscription from "../pages/User/Subscription/Subscription";
 
 const AppRoutes = () => (
   <Routes>
     <Route
       element={
-        // <ProtectedRoute>
+        <ProtectedRoute>
         <MainLayout />
-        // </ProtectedRoute>
+        </ProtectedRoute>
       }
     >
       //User Routes
       <Route path="/patients" element={<Patients />} />
       <Route path="/add-patients" element={<AddOrEditPatients />} />
       <Route path="/edit-patient/:id" element={<AddOrEditPatients />} />
-      <Route path="/subscription" element={<Subscription />} />
+      <Route path="/orders" element={<Subscription />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/settings" element={<Settings />} />
       //Admin Routes

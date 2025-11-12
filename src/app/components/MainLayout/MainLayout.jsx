@@ -34,9 +34,9 @@ const MENUS_BY_ROLE = {
     },
     {
       key: "subscription",
-      text: "Subscription",
+      text: "Orders",
       icon: <CardIcon />,
-      path: "/subscription",
+      path: "/orders",
     },
     {
       key: "profile",

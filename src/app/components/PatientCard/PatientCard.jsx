@@ -281,7 +281,7 @@ const PatientCard = ({
             open={prescPopoverOpen}
             onOpenChange={(v) => setPrescPopoverOpen(v)}
             content={prescriptionDocs.length > 1 ? prescPopoverContent : null}
-            destroyTooltipOnHide
+            destroyOnHidden
           >
             <ButtonComponent onClick={stop(handleOpenPrescriptions)}>
               <EyeIcon fillColor="#FFFFFF" /> <span>Prescriptions</span>

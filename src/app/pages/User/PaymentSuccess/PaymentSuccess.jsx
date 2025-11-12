@@ -35,7 +35,7 @@ const PaymentSuccess = () => {
           <Button type="primary" size="large" onClick={() => navigate("/patients")}>
             Go back to Patients
           </Button>
-          <Button size="large" onClick={() => navigate("/subscription")}>
+          <Button size="large" onClick={() => navigate("/orders")}>
             View Subscriptions
           </Button>
         </div>

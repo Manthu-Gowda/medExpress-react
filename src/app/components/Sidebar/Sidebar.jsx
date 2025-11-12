@@ -10,7 +10,7 @@ import LogoutIcon from "../../assets/icons/navbarIcons/LogoutIcon";
 
 const menuItems = [
   { text: "Patients", icon: <PatientsIcon />, path: "/patients" },
-  { text: "Subscription", icon: <CardIcon />, path: "/subscription" },
+  { text: "Subscription", icon: <CardIcon />, path: "/orders" },
   { text: "Profile", icon: <ProfileIcon />, path: "/profile" },
   { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
 ];
