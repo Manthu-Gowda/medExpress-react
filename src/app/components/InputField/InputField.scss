@@ -57,3 +57,40 @@
   //   // color: $grey_text !important;
   // }
 }
+
+
+.forminput {
+  .phone-field {
+    display: flex;
+    gap: 0; // seamless join
+  }
+
+  // .phone-code,
+  // .phone-number {
+  // }
+
+  /* Left (Select) – remove right radius & right border */
+  .phone-code .select-input.ant-select .ant-select-selector {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-right: 0 !important;
+    height: 45px !important;          // match your inputs
+    display: flex;
+    align-items: center;
+    box-shadow: 0px 0px 2px 0px #00000040;
+  }
+
+  /* Right (Input) – remove left radius & left border */
+  .phone-number .input {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    border-left: 0 !important;
+    height: 45px;
+    box-shadow: 0px 0px 2px 0px #00000040;
+  }
+
+  /* Widths */
+  .phone-code { width: 100px; }       
+  .phone-number { flex: 1; }
+}
+

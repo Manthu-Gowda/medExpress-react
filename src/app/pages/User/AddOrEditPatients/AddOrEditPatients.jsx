@@ -19,6 +19,7 @@ import {
 import { getApi, postApi, putApi } from "../../../utils/apiService";
 import Loader from "../../../components/Loader/Loader";
 import { errorToast, successToast } from "../../../services/ToastHelper";
+import PhoneField from "../../../components/InputField/PhoneField";
 
 const VISA_TYPES = [
   { value: 1, label: "A" },
@@ -78,11 +79,23 @@ const phoneRe = /^[0-9+\-() ]{7,15}$/; // replace if you want stricter E.164
 const isFuture = (d) => dayjs(d).isAfter(dayjs(), "day");
 const isPast = (d) => dayjs(d).isBefore(dayjs(), "day");
 
+// ---- phone helpers (US + IN only) ----
+const COUNTRY_CODES = [
+  { value: "+1", iso: "US", label: "US (+1)", max: 10, re: /^\d{10}$/ },
+  { value: "+91", iso: "IN", label: "IN (+91)", max: 10, re: /^[6-9]\d{9}$/ },
+];
+
+const getCountryRule = (code = "+1") =>
+  COUNTRY_CODES.find((c) => c.value === code) || COUNTRY_CODES[0];
+
+const digitsOnly = (s = "") => String(s).replace(/\D+/g, "");
+
 const AddOrEditPatients = () => {
   const { id } = useParams();
   const isEdit = Boolean(id);
   const [form, setForm] = useState({
     patientName: "",
+    phoneCountryCode: "+1", // <-- add this
     phone: "",
     email: "",
     dob: null,
@@ -188,6 +201,13 @@ const AddOrEditPatients = () => {
           }))
         : [],
     });
+    setErrors((prev) => ({
+      ...prev,
+      ...(data?.visaType ? { visaType: "" } : {}),
+      ...(data?.zipCodeId ? { zipCodeId: "" } : {}),
+      ...(data?.cityName ? { city: "" } : {}),
+      ...(data?.stateName ? { state: "" } : {}),
+    }));
 
     if (data?.zipCodeId) {
       const label = data?.zipCode || ""; // <-- correct source for label
@@ -210,10 +230,17 @@ const AddOrEditPatients = () => {
     }
 
     // Phone
-    if (!form.phone?.trim()) {
+    const digitsOnly = (s = "") => String(s).replace(/\D+/g, "");
+    const ccRule = getCountryRule(form.phoneCountryCode);
+    const rawPhone = digitsOnly(form.phone);
+
+    if (!rawPhone) {
       errObj.phone = "Phone is required";
-    } else if (!phoneRe.test(form.phone.trim())) {
-      errObj.phone = "Enter a valid phone number";
+    } else if (!ccRule.re.test(rawPhone)) {
+      errObj.phone =
+        ccRule.value === "+1"
+          ? "Enter a valid 10-digit US number"
+          : "Enter a valid 10-digit Indian number (starts 6–9)";
     }
 
     // Email
@@ -338,6 +365,7 @@ const AddOrEditPatients = () => {
           state: data.stateName ?? "",
           city: data.cityName ?? "",
         }));
+        setErrors((prev) => ({ ...prev, city: "", state: "" }));
       } else {
         setForm((p) => ({ ...p, city: "", state: "" }));
       }
@@ -436,6 +464,7 @@ const AddOrEditPatients = () => {
       cityId: undefined,
       stateId: undefined,
     }));
+    setErrors((prev) => ({ ...prev, zipCodeId: "", city: "", state: "" }));
     if (id) fetchStateAndCityByZipCode(id);
   };
 
@@ -447,6 +476,7 @@ const AddOrEditPatients = () => {
       city: "",
       state: "",
     }));
+    setErrors((prev) => ({ ...prev, zipCodeId: "", city: "", state: "" }));
   };
 
   const getRawFile = (f) => f?.originFileObj ?? f;
@@ -549,11 +579,17 @@ const AddOrEditPatients = () => {
         setIsLoading(false);
         return;
       }
+
+      // compute country-aware phone pieces for payload
+      const ccRule = getCountryRule(form.phoneCountryCode);
+      const rawPhone = digitsOnly(form.phone);
+
       const payload = {
         // names & contacts
         name: form.patientName?.trim(),
         email: form.email?.trim(),
-        phoneNumber: form.phone?.trim(),
+        countryCode: ccRule.value, // "+1" or "+91"
+        phoneNumber: rawPhone, // digits only
 
         // dates (ISO per your schema)
         dateOfBirth: toIsoOrNull(form.dob),
@@ -582,8 +618,9 @@ const AddOrEditPatients = () => {
       if (visa !== undefined) payload.visa = visa;
       if (prescriptions !== undefined) payload.prescriptions = prescriptions;
 
+      console.log("Payload:", payload);
       const { statusCode, message } = isEdit
-        ? await putApi(UPDATE_PATIENT, { id, ...payload }) // or putApi if you have it
+        ? await putApi(UPDATE_PATIENT, { id, ...payload })
         : await postApi(ADD_PATIENT, payload);
       if (statusCode === 200) {
         successToast(isEdit ? "Patient updated" : "Patient added");
@@ -627,14 +664,19 @@ const AddOrEditPatients = () => {
             required
             errorText={errors.patientName}
           />
-          <InputField
-            title="Phone Number"
-            placeholder="Enter phone number"
-            value={form.phone}
-            onChange={update("phone")}
-            type="tel"
-            errorText={errors.phone}
+          <PhoneField
             required
+            value={form.phone}
+            countryCode={form.phoneCountryCode}
+            onChangeCountry={(val) => {
+              setForm((p) => ({ ...p, phoneCountryCode: val }));
+              setErrors((prev) => ({ ...prev, phone: "" }));
+            }}
+            onChangePhone={(val) => {
+              setForm((p) => ({ ...p, phone: val }));
+              setErrors((prev) => ({ ...prev, phone: "" }));
+            }}
+            errorText={errors.phone}
           />
           <InputField
             title="Email"
@@ -659,13 +701,14 @@ const AddOrEditPatients = () => {
             title="Visa Type"
             options={VISA_TYPES}
             value={form.visaTypeId}
-            onChange={(val) =>
+            onChange={(val) => {
               setForm((p) => ({
                 ...p,
-                visaTypeId: val, // number
-                visaTypeName: VISA_ID_TO_LABEL[val] || "", // label
-              }))
-            }
+                visaTypeId: val,
+                visaTypeName: VISA_ID_TO_LABEL[val] || "",
+              }));
+              setErrors((prev) => ({ ...prev, visaType: "" })); // <--- clear error
+            }}
             errorText={errors.visaType}
             required
           />
