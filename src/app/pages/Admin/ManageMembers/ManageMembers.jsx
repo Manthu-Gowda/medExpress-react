@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Table, Tooltip } from "antd";
 import { EyeOutlined } from "@ant-design/icons";
@@ -6,43 +6,70 @@ import SubHeader from "../../../components/SubHeader/SubHeader";
 import Loader from "../../../components/Loader/Loader";
 import "./ManageMembers.scss";
 import MemberViewModal from "./MemberViewModal";
+import { use } from "react";
+import { GET_MEMBERS_DATA } from "../../../utils/apiPath";
+import { postApi } from "../../../utils/apiService";
+import EyeIcon from "../../../assets/icons/EyeIcon";
 
 const pad2 = (n) => String(n).padStart(2, "0");
 
 const ManageMembers = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [page, setPage] = useState(1);
-   const [open, setOpen] = useState(false);
-  const pageSize = 10;
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [open, setOpen] = useState(false);
+  const [members, setMembers] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [selectedMember, setSelectedMember] = useState(null); // 👈 NEW
 
-  // MOCK DATA — replace with API response
-  const data = useMemo(() => {
-    return Array.from({ length: 96 }).map((_, i) => ({
-      id: i + 1,
-      name: "Brahim elabbaoui",
-      email: "brahimelabbaoui1124@gmail.com",
-      totalPatients: 6,
-    }));
-  }, []);
+  useEffect(() => {
+    fetchMembers();
+  }, [pageIndex, pageSize]);
+
+  const fetchMembers = async () => {
+    setIsLoading(true);
+
+    const payload = {
+      pageIndex,
+      pageSize,
+      searchString: "",
+      isVerified: true,
+    };
+
+    const { statusCode, data, totalRecords } = await postApi(
+      GET_MEMBERS_DATA,
+      payload
+    );
+
+    if (statusCode === 200 && data) {
+      setMembers(data);
+      setTotal(totalRecords);
+    }
+
+    setIsLoading(false);
+  };
 
   const columns = [
     {
       title: "Sl No",
       dataIndex: "id",
       width: 90,
-      render: (_, __, index) => pad2((page - 1) * pageSize + index + 1),
+      render: (_, __, index) => pad2(pageIndex * pageSize + index + 1),
     },
     {
       title: "Member Name",
-      dataIndex: "name",
+      dataIndex: "userName",
       ellipsis: true,
       render: (text, record) => (
         <button
           type="button"
           className="mm__name"
-          onClick={() => navigate(`/members/${record.id}`)}
           title={text}
+          onClick={() => {
+            setSelectedMember(record); // 👈 pass full record
+            setOpen(true);
+          }}
         >
           {text}
         </button>
@@ -71,9 +98,12 @@ const ManageMembers = () => {
           <button
             type="button"
             className="mm__iconbtn"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              setSelectedMember(record); // 👈 pass full record
+              setOpen(true);
+            }}
           >
-            <EyeOutlined />
+            <EyeIcon />
           </button>
         </Tooltip>
       ),
@@ -91,11 +121,11 @@ const ManageMembers = () => {
           rowKey="id"
           loading={isLoading}
           columns={columns}
-          dataSource={data}
+          dataSource={members}
           pagination={{
-            current: page,
+            current: pageIndex + 1,
             pageSize,
-            total: data.length,
+            total,
             showSizeChanger: false,
             itemRender: (pageItem, type, originalElement) => {
               if (type === "prev") return <a>« Previous</a>;
@@ -103,9 +133,19 @@ const ManageMembers = () => {
               return originalElement;
             },
           }}
-          onChange={(pg) => setPage(pg.current)}
+          onChange={(pg) => {
+            setPageIndex(pg.current - 1);
+          }}
         />
-        <MemberViewModal open={open} onClose={() => setOpen(false)} />
+
+        <MemberViewModal
+          open={open}
+          onClose={() => {
+            setOpen(false);
+            setSelectedMember(null);
+          }}
+          member={selectedMember} // 👈 send selected member
+        />
       </section>
     </div>
   );

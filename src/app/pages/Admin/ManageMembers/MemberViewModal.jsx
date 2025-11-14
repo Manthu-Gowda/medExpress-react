@@ -1,107 +1,218 @@
-import React from "react";
+import React, { useState } from "react";
+import dayjs from "dayjs";
 import { DeleteFilled, EditOutlined } from "@ant-design/icons";
 import CustomModal from "../../../components/CustomModal/CustomModal";
 import "./MemberViewModal.scss";
+import SampleUser from "../../../assets/SampleUser.jpg";
+import ButtonComponent from "../../../components/ButtonComponent/ButtonComponent";
+import { Popover } from "antd";
 
-// Dummy member + patients (replace with API payload)
-const DUMMY_MEMBER = {
-  id: 1,
-  name: "Brahim elabbaoui",
-  email: "brahimelabbaoui1124@gmail.com",
-  address: "2nd cross, Banashankari, Bengaluru, Karnataka 562127",
-  avatar: "https://i.pravatar.cc/128?img=12",
-  patientsCount: 6,
-  patients: Array.from({ length: 6 }).map((_, i) => ({
-    id: i + 1,
-    name: "Brahim elabbaoui",
-    phone: "+91 9876543210",
-    email: "brahimelabbaoui1124@gmail.com",
-    address: "2nd cross, Banashankari, Bengaluru, Karnataka 562127",
-    visaType: "Business visa",
-    expiry: "12 Sep, 2028",
-    avatar: `https://i.pravatar.cc/96?img=${i + 20}`,
-  })),
+const formatAddress = (obj = {}) => {
+  const { address1, address2, cityName, stateName, countryName, zipCode } = obj;
+  return [address1, address2, cityName, stateName, countryName, zipCode]
+    .filter(Boolean)
+    .join(", ");
 };
 
-const MemberViewModal = ({ open, onClose, member = DUMMY_MEMBER }) => {
+const formatDate = (value) => {
+  if (!value) return "-";
+  return dayjs(value).format("DD MMM, YYYY");
+};
+
+const MemberViewModal = ({ open, onClose, member }) => {
+  const [prescPopoverOpenId, setPrescPopoverOpenId] = useState(null);
+  const hasMember = !!member;
+
+  const memberAddress = hasMember ? formatAddress(member) : "";
+  const patients = hasMember ? member.patients || [] : [];
+  const patientsCount =
+    hasMember && typeof member.totalPatients === "number"
+      ? member.totalPatients
+      : patients.length;
+
+  // ✅ Use SampleUser if no profilePicture
+  const avatar =
+    hasMember && member.profilePicture ? member.profilePicture : SampleUser;
+
   return (
     <CustomModal
       open={open}
       onClose={onClose}
-      title="Manage Members"
+      title="Member"
       showPrimary={false}
       showDanger={false}
       width={920}
       className="mv"
       bodyClassName="mv__body"
     >
-      {/* Member header */}
-      <section className="mv__section">
-        <div className="mv__sectionHead">
-          <h4 className="mv__sectionTitle">Member</h4>
-          <div className="mv__sectionActions">
-            <button type="button" className="mv__iconBtn mv__iconBtn--danger" title="Delete member">
-              <DeleteFilled />
-            </button>
-          </div>
-        </div>
-
-        <div className="mv__memberCard">
-          <img className="mv__memberAvatar" src={member.avatar} alt={member.name} />
-          <div className="mv__memberMeta">
-            <div className="mv__memberName">{member.name}</div>
-            <div className="mv__muted">{member.email}</div>
-            <div className="mv__muted">{member.address}</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Patients */}
-      <section className="mv__section">
-        <div className="mv__sectionHead">
-          <h4 className="mv__sectionTitle">
-            Patients ({String(member.patientsCount).padStart(2, "0")})
-          </h4>
-        </div>
-
-        <div className="mv__patientGrid">
-          {member.patients.map((p) => (
-            <article key={p.id} className="mv__patientCard">
-              <header className="mv__patientHeader">
-                <div className="mv__patientLeft">
-                  <img className="mv__patientAvatar" src={p.avatar} alt={p.name} />
-                  <div>
-                    <div className="mv__patientName">{p.name}</div>
-                    <div className="mv__phone">{p.phone}</div>
-                    <div className="mv__muted">{p.email}</div>
-                  </div>
-                </div>
-                <button type="button" className="mv__iconBtn" title="Edit">
-                  <EditOutlined />
+      {!hasMember ? (
+        <div className="mv__empty">No member selected.</div>
+      ) : (
+        <>
+          {/* Member header */}
+          <section className="mv__section">
+            <div className="mv__memberCard">
+              <img
+                className="mv__memberAvatar"
+                src={avatar}
+                alt={member.userName}
+              />
+              <div className="mv__memberMeta">
+                <div className="mv__memberName">{member.userName}</div>
+                <div className="mv__muted">{member.email}</div>
+                <div className="mv__muted">{memberAddress}</div>
+              </div>
+              <div className="mv__sectionActions">
+                <button
+                  type="button"
+                  className="mv__iconBtn mv__iconBtn--danger"
+                  title="Delete member"
+                >
+                  <DeleteFilled />
                 </button>
-              </header>
-
-              <div className="mv__address">{p.address}</div>
-
-              <div className="mv__kv">
-                <div>
-                  <span className="mv__muted">Visa :</span>
-                  <span className="mv__strong">&nbsp;{p.visaType}</span>
-                </div>
-                <div>
-                  <span className="mv__muted">Exp :</span>
-                  <span className="mv__strong">&nbsp;{p.expiry}</span>
-                </div>
               </div>
+            </div>
+          </section>
 
-              <div className="mv__ctaRow">
-                <button type="button" className="mv__btn mv__btn--ghost">View Passport</button>
-                <button type="button" className="mv__btn mv__btn--primary">View Prescriptions</button>
+          {/* Patients */}
+          <section className="mv__section">
+            <div className="mv__sectionHead">
+              <h4 className="mv__sectionTitle">
+                Patients ({String(patientsCount).padStart(2, "0")})
+              </h4>
+            </div>
+
+            {patients.length === 0 ? (
+              <div className="mv__empty">
+                Patients not available for this member.
               </div>
-            </article>
-          ))}
-        </div>
-      </section>
+            ) : (
+              <div className="mv__patientGrid">
+                {patients.map((p) => {
+                  const patientAddress = formatAddress(p);
+                  const phone = [p.countryCode, p.phoneNumber]
+                    .filter(Boolean)
+                    .join(" ");
+
+                  const patientAvatar = SampleUser;
+                  const prescriptions = p.prescriptions || [];
+                  const hasPresc = prescriptions.length > 0;
+                  const multiplePresc = prescriptions.length > 1;
+                  const firstPrescUrl = hasPresc ? prescriptions[0].url : null;
+                  const prescPopoverContent = (
+                    <div className="mv__prescList">
+                      {prescriptions.map((doc, idx) => (
+                        <button
+                          key={doc.url || idx}
+                          type="button"
+                          className="mv__prescItem"
+                          onClick={() => {
+                            if (doc.url) {
+                              window.open(doc.url, "_blank");
+                              setPrescPopoverOpenId(null);
+                            }
+                          }}
+                        >
+                          {doc.fileName || `Prescription ${idx + 1}`}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                  return (
+                    <article key={p.id} className="mv__patientCard">
+                      <header className="mv__patientHeader">
+                        <div className="mv__patientLeft">
+                          <img
+                            className="mv__patientAvatar"
+                            src={patientAvatar}
+                            alt={p.name}
+                          />
+                          <div>
+                            <div className="mv__patientName">{p.name}</div>
+                            <div className="mv__phone">{phone}</div>
+                            <div className="mv__muted">{p.email}</div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          className="mv__iconBtn"
+                          title="Edit"
+                        >
+                          <EditOutlined />
+                        </button>
+                      </header>
+
+                      <div className="mv__address">{patientAddress}</div>
+
+                      <div className="mv__kv">
+                        <div>
+                          <span className="mv__muted">Visa :</span>
+                          <span className="mv__strong">
+                            &nbsp;{p.visaTypeName || "-"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="mv__muted">Exp :</span>
+                          <span className="mv__strong">
+                            &nbsp;{formatDate(p.visaExpiryDate)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mv__ctaRow">
+                        <ButtonComponent
+                          variant="secondary2"
+                          disabled={!p.passport?.url}
+                          onClick={() => {
+                            if (p.passport?.url) {
+                              window.open(p.passport.url, "_blank");
+                            }
+                          }}
+                        >
+                          View Passport
+                        </ButtonComponent>
+                        {!hasPresc ? (
+                          // No prescriptions at all
+                          <ButtonComponent disabled>
+                            View Prescriptions
+                          </ButtonComponent>
+                        ) : multiplePresc ? (
+                          // Multiple prescriptions -> show Popover with fileNames
+                          <Popover
+                            trigger="click"
+                            placement="top"
+                            open={prescPopoverOpenId === p.id}
+                            onOpenChange={(v) =>
+                              setPrescPopoverOpenId(v ? p.id : null)
+                            }
+                            content={prescPopoverContent}
+                            destroyTooltipOnHide
+                          >
+                            <ButtonComponent>
+                              View Prescriptions
+                            </ButtonComponent>
+                          </Popover>
+                        ) : (
+                          // Single prescription -> just open directly
+                          <ButtonComponent
+                            onClick={() => {
+                              if (firstPrescUrl) {
+                                window.open(firstPrescUrl, "_blank");
+                              }
+                            }}
+                          >
+                            View Prescriptions
+                          </ButtonComponent>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </>
+      )}
     </CustomModal>
   );
 };

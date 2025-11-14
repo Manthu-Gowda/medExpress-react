@@ -19,7 +19,7 @@
 }
 
 .mv__body {
-  padding: 8px 8px 16px;
+  padding: 16px;
 }
 
 .mv__section + .mv__section {
@@ -30,29 +30,11 @@
   overflow-y: auto;
 }
 
-.mv__sectionHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 6px 6px 10px;
-}
-
-.mv__sectionTitle {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: $primary_text;
-}
-
-.mv__sectionActions {
-  display: flex;
-  gap: 8px;
-}
-
 /* Member card */
 .mv__memberCard {
-  display: grid;
-  grid-template-columns: 72px 1fr;
+  // display: grid;
+  // grid-template-columns: 72px 1fr;
+  display: flex;
   gap: 14px;
   background: $primary_bg;
   border: 1px solid $primary_border;
@@ -70,7 +52,7 @@
 .mv__memberMeta {
   display: grid;
   gap: 4px;
-  align-content: center;
+  width: -webkit-fill-available;
 }
 .mv__memberName {
   font-size: 20px;
@@ -102,7 +84,6 @@
 
 .mv__patientHeader {
   display: flex;
-  align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
 }
@@ -135,14 +116,15 @@
   margin: 8px 0 12px;
   line-height: 1.4;
   border-bottom: 1px solid $primary_border;
-  padding-bottom: 12px;
+  border-top: 1px solid $primary_border;
+  padding: 16px 0;
 }
 
 .mv__kv {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 .mv__strong {
   color: $primary_text;
@@ -153,13 +135,14 @@
 .mv__iconBtn {
   width: 28px;
   height: 28px;
-  border-radius: 999px;
+  border-radius: 6px;
   display: grid;
   place-items: center;
   background: rgba($brand_color, 0.12);
   border: 1px solid rgba($brand_color, 0.28);
   color: $brand_color;
   line-height: 0;
+  cursor: pointer;
 
   &--danger {
     background: rgba(255, 77, 79, 0.12);
@@ -171,23 +154,16 @@
 /* CTA buttons inside card */
 .mv__ctaRow {
   display: flex;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 20px;
 }
-.mv__btn {
-  height: 34px;
-  padding: 0 14px;
-  border-radius: 8px;
-  font-weight: 700;
-  border: 1px solid $primary_border;
-  background: $primary_white;
-  color: $primary_text;
 
-  &--ghost {
-    background: $primary_white;
-  }
-  &--primary {
-    background: $brand_color;
-    border-color: $brand_color;
-    color: $primary_white;
-  }
+.mv__prescItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  border: none;
+  background-color: #fff;
+  cursor: pointer;
 }
