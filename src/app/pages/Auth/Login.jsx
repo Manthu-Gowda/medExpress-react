@@ -75,27 +75,22 @@ const handleSubmit = async () => {
     };
     
     const { statusCode, data, message } = await postApi(USER_LOGIN, payload);
-    
     if (statusCode === 200) {
       saveAuthToSession(data);
       setIsLoading(false);
       successToast("Successfully Logged In");
-
-      // Extract role (either from data.roles or data.role)
       const role = Array.isArray(data.roles) ? data.roles[0] : data.role;
-
-      // Navigate based on role
       if (role === "Admin") {
         navigate("/dashboard");
       } else if (role === "User") {
         navigate("/patients");
       } else {
-        navigate("/"); // fallback route if needed
+        navigate("/");
       }
 
     } else {
       setIsLoading(false);
-      errorToast(message || "Invalid credentials. Please try again.");
+      errorToast(message);
     }
   }
 };

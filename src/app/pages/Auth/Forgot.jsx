@@ -60,7 +60,6 @@ export default function Forgot() {
         successToast(
           "We've sent a reset password link to your registered email ID."
         );
-        // navigate("/");
       } else {
         setIsLoading(false);
         errorToast(message);

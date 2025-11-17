@@ -40,6 +40,17 @@ const formatAddressLine = ({
   return [line1, line2, line3, line4].filter(Boolean).join(",  ");
 };
 
+/** 🔹 Phone helpers (same rules as Add/Edit Patients) */
+const COUNTRY_CODES = [
+  { value: "+1", iso: "US", label: "US (+1)", max: 10, re: /^\d{10}$/ },
+  { value: "+91", iso: "IN", label: "IN (+91)", max: 10, re: /^[6-9]\d{9}$/ },
+];
+
+const getCountryRule = (code = "+1") =>
+  COUNTRY_CODES.find((c) => c.value === code) || COUNTRY_CODES[0];
+
+const digitsOnly = (s = "") => String(s).replace(/\D+/g, "");
+
 /** API → UI mapping (handles API’s field names & the `profilePicture` typo) */
 const apiToUi = (api) => {
   if (!api) return null;
@@ -111,7 +122,7 @@ const uiToApi = (ui) => {
   return {
     profilePicture: normalizeAvatar(ui.avatar),
     userName: ui.name,
-    countryCode: ui.phoneCountryCode || "+1", // <--- NEW
+    countryCode: ui.phoneCountryCode || "+1",
     phoneNumber: String(ui.phone || "").replace(/\D+/g, ""), // digits only
     address1: ui.house || "",
     address2: ui.unit || "",
@@ -128,7 +139,7 @@ const Profile = () => {
       avatar: PLACEHOLDER_AVATAR,
       name: "",
       phone: "",
-      phoneCountryCode: "+1", // <--- NEW
+      phoneCountryCode: "+1",
       email: "",
       addressLine: "",
       zip: "",
@@ -137,7 +148,7 @@ const Profile = () => {
       zipId: undefined,
       cityId: undefined,
       stateId: undefined,
-      countryId: "5f030c51-ae0b-4fd5-8a4c-39f74e63c570", // fixed as you said
+      countryId: "5f030c51-ae0b-4fd5-8a4c-39f74e63c570",
       house: "",
       unit: "",
     }),
@@ -159,6 +170,14 @@ const Profile = () => {
   const cityStateAbortRef = useRef(null);
   const requestIdRef = useRef(0);
   const MIN_ZIP_CHARS = 3;
+
+  /** 🔹 Error state */
+  const [errors, setErrors] = useState({
+    name: "",
+    phone: "",
+    zipId: "",
+    house: "",
+  });
 
   const upsertZipOption = (id, label) => {
     if (!id || !label) return;
@@ -189,7 +208,6 @@ const Profile = () => {
   const fetchStateAndCityByZipCode = async (zipId) => {
     if (!zipId) return;
 
-    // cancel any previous request (user might change selection quickly)
     cancelCityStateInFlight();
     const controller = new AbortController();
     cityStateAbortRef.current = controller;
@@ -220,11 +238,9 @@ const Profile = () => {
     }
   };
 
-  // cleanup on unmount
   useEffect(() => () => cancelCityStateInFlight(), []);
 
   const fetchZipCodes = async (query = "") => {
-    // 1) Cache hit => instant render
     const q = String(query || "").trim();
     if (cacheRef.current.has(q)) {
       setZipOptions(cacheRef.current.get(q));
@@ -282,11 +298,13 @@ const Profile = () => {
       cityId: undefined,
       stateId: undefined,
     }));
+    setErrors((prev) => ({ ...prev, zipId: "" })); // clear zip error
     if (id) fetchStateAndCityByZipCode(id);
   };
 
   const handleZipClear = () => {
     setDraft((p) => ({ ...p, zipId: undefined, zip: "", city: "", state: "" }));
+    setErrors((prev) => ({ ...prev, zipId: "" }));
   };
 
   // Trigger hidden input
@@ -294,7 +312,7 @@ const Profile = () => {
     fileInputRef.current?.click();
   };
 
-  // Handle image file selection (preview only; upload to server separately if needed)
+  // Handle image file selection
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -305,16 +323,13 @@ const Profile = () => {
       return;
     }
 
-    // Preview
     const reader = new FileReader();
     reader.onloadend = () => {
-      // Update both so UI is in sync regardless of edit mode
       setDraft((prev) => ({ ...prev, avatar: reader.result }));
       setData((prev) => ({ ...prev, avatar: reader.result }));
     };
     reader.readAsDataURL(file);
 
-    // Keep original file for upload if needed
     setAvatarFile(file);
   };
 
@@ -330,7 +345,6 @@ const Profile = () => {
     const { name, value } = e.target;
     setDraft((p) => {
       const next = { ...p, [name]: value };
-      // keep combined location updated live while editing
       next.addressLine = formatAddressLine({
         house: next.house,
         unit: next.unit,
@@ -341,14 +355,62 @@ const Profile = () => {
       });
       return next;
     });
+    setErrors((prev) => ({ ...prev, [name]: "" })); // clear field error
   };
 
   const handleEdit = () => {
-    setDraft(data); // start from current values
+    setDraft(data);
     setEdit(true);
   };
 
+  /** 🔹 Validation for profile form */
+  const validateProfile = () => {
+    const errObj = {
+      name: "",
+      phone: "",
+      zipId: "",
+      house: "",
+    };
+
+    // Name
+    if (!draft.name?.trim()) {
+      errObj.name = "User name is required";
+    } else if (draft.name.trim().length < 2) {
+      errObj.name = "Name must be at least 2 characters";
+    }
+
+    // Phone
+    const rule = getCountryRule(draft.phoneCountryCode || "+1");
+    const rawPhone = digitsOnly(draft.phone);
+    if (!rawPhone) {
+      errObj.phone = "Phone number is required";
+    } else if (!rule.re.test(rawPhone)) {
+      errObj.phone =
+        rule.value === "+1"
+          ? "Enter a valid 10-digit US number"
+          : "Enter a valid 10-digit Indian number (starts 6–9)";
+    }
+
+    // Zip
+    if (!draft.zipId) {
+      errObj.zipId = "Zip Code is required";
+    }
+
+    // House / Street
+    if (!draft.house?.trim()) {
+      errObj.house = "House Number & Street Name is required";
+    }
+
+    setErrors(errObj);
+    return Object.values(errObj).every((v) => !v);
+  };
+
   const handleSave = async () => {
+    // validate only when in edit mode
+    if (edit && !validateProfile()) {
+      return;
+    }
+
     try {
       setSaving(true);
       const base = edit ? draft : data;
@@ -371,28 +433,23 @@ const Profile = () => {
       if (statusCode === 200) {
         successToast(message || "Profile updated successfully");
 
-        // refresh local UI
         const fresh = apiToUi(apiUser);
         setData(fresh);
         setDraft(fresh);
         setAvatarFile(null);
         setEdit(false);
 
-        // ✅ update sessionStorage.user (only fields you care about)
         try {
           const raw = sessionStorage.getItem("user");
           const existing = raw ? JSON.parse(raw) : {};
 
           const updated = {
             ...existing,
-            // keep existing ids & email as-is; update only these two:
             userName: apiUser?.userName ?? existing.userName,
             profilePicture: apiUser?.profilePicture ?? existing.profilePicture,
-
-            // (optional) keep these in sync too if you ever need them)
             phoneNumber: apiUser?.phoneNumber ?? existing.phoneNumber,
             emailId: apiUser?.email ?? existing.emailId,
-            userId: existing.userId || apiUser?.id, // preserve your stored key naming
+            userId: existing.userId || apiUser?.id,
           };
 
           sessionStorage.setItem("user", JSON.stringify(updated));
@@ -413,7 +470,8 @@ const Profile = () => {
   };
 
   const handleCancel = () => {
-    setDraft(data); // discard changes
+    setDraft(data);
+    setErrors({ name: "", phone: "", zipId: "", house: "" });
     setEdit(false);
   };
 
@@ -454,7 +512,6 @@ const Profile = () => {
           </div>
 
           <div className="profileHero__upload">
-            {" "}
             {avatarFile ? (
               <div className="uploadActions">
                 <button
@@ -470,7 +527,6 @@ const Profile = () => {
                   className="uploadBtn uploadBtn--ghost"
                   onClick={() => {
                     setAvatarFile(null);
-                    // Optional: revert preview to saved avatar
                     setDraft((p) => ({
                       ...p,
                       avatar: data.avatar || PLACEHOLDER_AVATAR,
@@ -519,7 +575,7 @@ const Profile = () => {
                 Edit
               </ButtonComponent>
             ) : (
-              <div className="actions">
+              <div className="actions actions--desktop">
                 <ButtonComponent
                   variant="danger"
                   onClick={handleCancel}
@@ -546,7 +602,9 @@ const Profile = () => {
             </div>
             <div className="piCol">
               <div className="piLabel">Phone Number</div>
-              <div className="piValue accent">{data.phoneCountryCode + " " + data.phone || "-"}</div>
+              <div className="piValue accent">
+                {data.phoneCountryCode + " " + data.phone || "-"}
+              </div>
             </div>
             <div className="piCol">
               <div className="piLabel">Email</div>
@@ -554,7 +612,7 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Edit inputs directly below the summary */}
+          {/* Edit inputs */}
           {edit && (
             <div className="piGrid piGrid--form piGrid--tightTop">
               <InputField
@@ -563,6 +621,8 @@ const Profile = () => {
                 placeholder="Enter User Name"
                 value={draft.name}
                 onChange={onChange}
+                required
+                errorText={errors.name}
               />
 
               <PhoneField
@@ -570,10 +630,15 @@ const Profile = () => {
                 required
                 value={draft.phone}
                 countryCode={draft.phoneCountryCode || "+1"}
-                onChangeCountry={(val) =>
-                  setDraft((p) => ({ ...p, phoneCountryCode: val }))
-                }
-                onChangePhone={(val) => setDraft((p) => ({ ...p, phone: val }))}
+                onChangeCountry={(val) => {
+                  setDraft((p) => ({ ...p, phoneCountryCode: val }));
+                  setErrors((prev) => ({ ...prev, phone: "" }));
+                }}
+                onChangePhone={(val) => {
+                  setDraft((p) => ({ ...p, phone: val }));
+                  setErrors((prev) => ({ ...prev, phone: "" }));
+                }}
+                errorText={errors.phone}
               />
 
               <InputField
@@ -605,19 +670,19 @@ const Profile = () => {
               <SelectInput
                 title="Zip Code"
                 placeholder="Search Zip Code"
-                options={zipOptions} // [{label, value}]
+                options={zipOptions}
                 value={draft.zipId ?? null}
-                onChange={handleZipChange} // keeps zipId + zip label
+                onChange={handleZipChange}
                 showSearch
                 allowClear
-                // Remote search hooks
-                filterOption={false} // don't filter on client
-                onSearch={handleZipSearch} // debounce + API
+                filterOption={false}
+                onSearch={handleZipSearch}
                 onFocus={handleZipFocus}
                 onClear={handleZipClear}
                 loading={zipLoading}
                 notFoundContent={zipLoading ? "Loading..." : "No results"}
                 required
+                errorText={errors.zipId}
               />
               <InputField
                 title="City"
@@ -641,6 +706,8 @@ const Profile = () => {
                 placeholder="Enter House Number"
                 value={draft.house}
                 onChange={onChange}
+                required
+                errorText={errors.house}
               />
               <InputField
                 title="Apartment / Unit Number"
@@ -649,6 +716,24 @@ const Profile = () => {
                 value={draft.unit}
                 onChange={onChange}
               />
+            </div>
+          )}
+          {edit && (
+            <div className="card__footer actions actions--mobile">
+              <ButtonComponent
+                variant="danger"
+                onClick={handleCancel}
+                disabled={saving}
+              >
+                Cancel
+              </ButtonComponent>
+              <ButtonComponent
+                variant="primary"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save"}
+              </ButtonComponent>
             </div>
           )}
         </div>

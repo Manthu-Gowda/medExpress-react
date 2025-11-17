@@ -11,6 +11,11 @@ const formatSize = (bytes) => {
   return `${(bytes / Math.pow(k, i)).toFixed(i ? 1 : 0)} ${sizes[i]}`;
 };
 
+const truncateName = (name = "", max = 25) => {
+  if (!name) return "";
+  return name.length > max ? name.slice(0, max) + "..." : name;
+};
+
 const FileDropzone = forwardRef((props, ref) => {
   const {
     title,
@@ -27,7 +32,6 @@ const FileDropzone = forwardRef((props, ref) => {
     name = "file-upload",
     folderIcon = null,
     height = 160,
-    
   } = props;
 
   const inputRef = ref || useRef(null);
@@ -110,7 +114,6 @@ const FileDropzone = forwardRef((props, ref) => {
         style={{ display: "none" }}
       />
 
-      {/* Keep the dropzone UI hidden after first file if you want */}
       {!files.length && (
         <div
           className={`filedropzone ${dragActive ? "is-drag" : ""} ${
@@ -173,6 +176,8 @@ const FileDropzone = forwardRef((props, ref) => {
                 ? f.url.split("/").pop()
                 : "Document");
 
+            const displayName = truncateName(niceName, 25); // 
+
             const sizeVal =
               typeof f?.size === "number"
                 ? f.size
@@ -185,7 +190,7 @@ const FileDropzone = forwardRef((props, ref) => {
             return (
               <li key={i} className="dz-file">
                 <span className="dz-file-name" title={niceName}>
-                  {niceName}
+                  {displayName}
                 </span>
                 {sizeText && <span className="dz-file-size">{sizeText}</span>}
                 {!disabled && (
@@ -207,7 +212,6 @@ const FileDropzone = forwardRef((props, ref) => {
         </ul>
       )}
 
-      {/* “Add more” always works now because input exists */}
       {files.length > 0 && multiple && !disabled && (
         <button type="button" className="dz-add-more" onClick={chooseFiles}>
           + Add more files

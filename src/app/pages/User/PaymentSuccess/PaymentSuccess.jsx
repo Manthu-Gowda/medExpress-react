@@ -28,7 +28,7 @@ const PaymentSuccess = () => {
 
         <h1 className="payResult__title">Payment Successful</h1>
         <p className="payResult__subtitle">
-          Your subscription has been activated. Thank you!
+          Your order has been activated. Thank you!
         </p>
 
         <div className="payResult__actions">
@@ -36,7 +36,7 @@ const PaymentSuccess = () => {
             Go back to Patients
           </Button>
           <Button size="large" onClick={() => navigate("/orders")}>
-            View Subscriptions
+            View Orders
           </Button>
         </div>
       </div>

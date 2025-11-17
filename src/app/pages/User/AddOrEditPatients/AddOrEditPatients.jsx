@@ -47,16 +47,22 @@ const VISA_ID_TO_LABEL = Object.fromEntries(
   VISA_TYPES.map((o) => [o.value, o.label])
 );
 
-// helpers (near other date helpers)
+// ---- date helpers ----
+const DATE_FORMAT = "MM-DD-YYYY";
+
 const disabledTodayAndFuture = (current) =>
   current && !dayjs(current).isBefore(dayjs(), "day"); // disables today & future
+
+// NEW: disable past AND today => only allow strictly future dates
+const disabledPastAndToday = (current) =>
+  current && !dayjs(current).isAfter(dayjs(), "day"); // disables today & past
 
 const initialErrors = {
   patientName: "",
   phone: "",
   email: "",
   dob: "",
-  visaType: "", // keep the same key if your InputField shows errors.visaType
+  visaType: "",
   visaExpiry: "",
   lastEntry: "",
   zipCodeId: "",
@@ -93,13 +99,12 @@ const AddOrEditPatients = () => {
   const isEdit = Boolean(id);
   const [form, setForm] = useState({
     patientName: "",
-    phoneCountryCode: "+1", // <-- add this
+    phoneCountryCode: "+1",
     phone: "",
     email: "",
     dob: null,
-    // ---- visa fields
-    visaTypeId: undefined, // <-- store the ID here
-    visaTypeName: "", // <-- store the label here
+    visaTypeId: undefined,
+    visaTypeName: "",
     visaExpiry: null,
     lastEntry: null,
     zipCodeId: undefined,
@@ -160,7 +165,6 @@ const AddOrEditPatients = () => {
       stateId: data?.stateId ?? undefined,
       countryId: data?.countryId ?? "5f030c51-ae0b-4fd5-8a4c-39f74e63c570",
 
-      // display strings; you might get names in payload or you can fetch via zip
       city: data?.cityName ?? "",
       state: data?.stateName ?? "",
       zip: data?.zipCode ?? "",
@@ -169,11 +173,11 @@ const AddOrEditPatients = () => {
       passport: data?.passport?.url
         ? [
             {
-              uid: "-1", // required by AntD Upload
-              name: data.passport.fileName || "Passport.pdf", // name for display
-              status: "done", // mark as uploaded
-              url: data.passport.url, // S3 file
-              fileName: data.passport.fileName, // keep original filename
+              uid: "-1",
+              name: data.passport.fileName || "Passport.pdf",
+              status: "done",
+              url: data.passport.url,
+              fileName: data.passport.fileName,
             },
           ]
         : [],
@@ -209,7 +213,7 @@ const AddOrEditPatients = () => {
     }));
 
     if (data?.zipCodeId) {
-      const label = data?.zipCode || ""; // <-- correct source for label
+      const label = data?.zipCode || "";
       upsertZipOption(data.zipCodeId, label);
     }
 
@@ -263,34 +267,27 @@ const AddOrEditPatients = () => {
       errObj.visaType = "Select a visa type";
     }
 
-    // Visa expiry (optional -> if present, must be today or future)
-    if (form.visaExpiry && isPast(form.visaExpiry)) {
-      errObj.visaExpiry = "Visa expiry cannot be in the past";
-    }
-    // Visa expiry (REQUIRED and not in the past)
+    // Visa expiry: REQUIRED and must be STRICTLY in the future (not today)
     if (!form.visaExpiry) {
       errObj.visaExpiry = "Visa expiry date is required";
-    } else if (isPast(form.visaExpiry)) {
-      errObj.visaExpiry = "Visa expiry cannot be in the past";
+    } else if (!dayjs(form.visaExpiry).isAfter(dayjs(), "day")) {
+      errObj.visaExpiry = "Visa expiry must be a future date";
     }
 
-    // USA last entry (optional -> if present, cannot be in the future)
-    if (form.lastEntry && isFuture(form.lastEntry)) {
-      errObj.lastEntry = "Last entry cannot be in the future";
-    }
+    // USA last entry: REQUIRED, cannot be today or in the future
     if (!form.lastEntry) {
       errObj.lastEntry = "USA last entry date is required";
     } else if (!dayjs(form.lastEntry).isBefore(dayjs(), "day")) {
       errObj.lastEntry = "Last entry cannot be today or in the future";
     }
-    // Zip (required -> use zipCodeId since Select stores UUID)
+
+    // Zip (required)
     if (!form.zipCodeId) {
       errObj.zipCodeId = "Zip Code is required";
     }
     if (!form.city?.trim()) {
       errObj.city = "City is required";
     }
-
     if (!form.state?.trim()) {
       errObj.state = "State is required";
     }
@@ -300,7 +297,7 @@ const AddOrEditPatients = () => {
       errObj.street = "Street address is required";
     }
 
-    // Passport file (required)
+    // Files required only when adding
     if (!isEdit) {
       if (!files.passport?.length)
         errObj.passport = "Passport file is required";
@@ -308,6 +305,7 @@ const AddOrEditPatients = () => {
       if (!files.prescription?.length)
         errObj.prescriptions = "At least one prescription is required";
     }
+
     setErrors(errObj);
     const isValid = Object.values(errObj).every((v) => !v);
     return isValid;
@@ -317,6 +315,7 @@ const AddOrEditPatients = () => {
     setErrors((prev) => (prev[key] ? { ...prev, [key]: "" } : prev));
 
   const disabledFuture = (current) => current && current > dayjs().endOf("day");
+
   const update = (name) => (e) => {
     const value = e?.target ? e.target.value : e;
     setForm((p) => ({ ...p, [name]: value }));
@@ -345,7 +344,6 @@ const AddOrEditPatients = () => {
   const fetchStateAndCityByZipCode = async (zipCodeId) => {
     if (!zipCodeId) return;
 
-    // cancel any previous request (user might change selection quickly)
     cancelCityStateInFlight();
     const controller = new AbortController();
     cityStateAbortRef.current = controller;
@@ -381,14 +379,12 @@ const AddOrEditPatients = () => {
   useEffect(() => () => cancelCityStateInFlight(), []);
 
   const fetchZipCodes = async (query = "") => {
-    // 1) Cache hit => instant render
     const q = String(query || "").trim();
     if (cacheRef.current.has(q)) {
       setZipOptions(cacheRef.current.get(q));
       return;
     }
 
-    // assign an id to this request
     const myId = ++requestIdRef.current;
 
     setZipLoading(true);
@@ -434,7 +430,6 @@ const AddOrEditPatients = () => {
   const MIN_ZIP_CHARS = 3;
   const handleZipSearch = (input = "") => {
     const q = String(input).trim();
-    // if user erased or < 3 chars, clear list and cancel in-flight
     if (q.length < MIN_ZIP_CHARS) {
       cancelInFlight();
       setZipOptions([]);
@@ -445,7 +440,6 @@ const AddOrEditPatients = () => {
   };
 
   const handleZipFocus = () => {
-    // prefetch if nothing loaded yet
     if (!zipOptions.length) fetchZipCodes("");
   };
 
@@ -480,10 +474,6 @@ const AddOrEditPatients = () => {
 
   const getRawFile = (f) => f?.originFileObj ?? f;
 
-  // ===== helpers: put above handleSubmit =====
-
-  // Turn "File" into { fileName, base64 }
-  // Convert a File into a base64 string (without data: prefix)
   const fileToBase64 = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -494,7 +484,6 @@ const AddOrEditPatients = () => {
 
   const hasNonEmptyUrl = (u) => typeof u === "string" && u.trim().length > 0;
 
-  // Try to pull the underlying File object from various possible shapes
   const extractRawFile = (item) => {
     if (!item) return null;
     if (item.originFileObj instanceof File) return item.originFileObj;
@@ -505,11 +494,9 @@ const AddOrEditPatients = () => {
     return null;
   };
 
-  // Normalize one item to { url, fileName } or return null if not usable
   const toApiDoc = async (item) => {
     if (!item) return null;
 
-    // Existing uploaded file with a valid URL
     if (hasNonEmptyUrl(item.url)) {
       return {
         url: item.url,
@@ -517,7 +504,6 @@ const AddOrEditPatients = () => {
       };
     }
 
-    // Newly uploaded file -> convert to base64
     const raw = extractRawFile(item);
     if (raw) {
       const base64 = await fileToBase64(raw);
@@ -527,17 +513,14 @@ const AddOrEditPatients = () => {
       };
     }
 
-    // Nothing usable -> skip
     return null;
   };
 
-  // Handle a single-file control (returns one object or null)
   const oneToApiDoc = async (arr = []) => {
     if (!Array.isArray(arr) || !arr.length) return null;
     return await toApiDoc(arr[0]);
   };
 
-  // Handle multi-file control (returns array or null)
   const manyToApiDocs = async (arr = []) => {
     if (!Array.isArray(arr) || !arr.length) return null;
     const out = [];
@@ -548,20 +531,6 @@ const AddOrEditPatients = () => {
     return out.length ? out : null;
   };
 
-  const encodeOne = async (arr = []) => {
-    const raw = arr?.[0] ? getRawFile(arr[0]) : null;
-    return raw ? fileToBase64StringOnly(raw) : ""; // empty string if none
-  };
-
-  const encodeMany = async (arr = []) => {
-    const list = Array.isArray(arr) ? arr : [];
-    const out = [];
-    for (const it of list) {
-      const raw = getRawFile(it);
-      out.push(await fileToBase64StringOnly(raw));
-    }
-    return out;
-  };
   const toIsoOrNull = (d) => (d ? dayjs(d).toISOString() : null);
 
   const handleSubmit = async () => {
@@ -579,36 +548,25 @@ const AddOrEditPatients = () => {
         return;
       }
 
-      // compute country-aware phone pieces for payload
       const ccRule = getCountryRule(form.phoneCountryCode);
       const rawPhone = digitsOnly(form.phone);
 
       const payload = {
-        // names & contacts
         name: form.patientName?.trim(),
         email: form.email?.trim(),
-        countryCode: ccRule.value, // "+1" or "+91"
-        phoneNumber: rawPhone, // digits only
-
-        // dates (ISO per your schema)
+        countryCode: ccRule.value,
+        phoneNumber: rawPhone,
         dateOfBirth: toIsoOrNull(form.dob),
         visaExpiryDate: toIsoOrNull(form.visaExpiry),
         usaLastEntryDate: toIsoOrNull(form.lastEntry),
-
-        // visa (both fields)
-        visaType: Number(form.visaTypeId), // numeric
-        visaTypeName: form.visaTypeName, // label
-
-        // address mapping
+        visaType: Number(form.visaTypeId),
+        visaTypeName: form.visaTypeName,
         address1: form.street?.trim() || "",
         address2: form.apt?.trim() || "",
-
-        // location IDs (schema field names!)
         zipCodeId: form.zipCodeId,
         cityId: form.cityId,
         stateId: form.stateId,
         countryId: form.countryId || null,
-
         passport,
         visa,
         prescriptions,
@@ -629,7 +587,6 @@ const AddOrEditPatients = () => {
       }
     } catch (e) {
       console.error(e);
-      errorToast("Something went wrong while saving the patient.");
     } finally {
       setIsLoading(false);
     }
@@ -694,6 +651,7 @@ const AddOrEditPatients = () => {
             required
             errorText={errors.dob}
             disabledDate={disabledFuture}
+            format={DATE_FORMAT} // MM-DD-YYYY
           />
 
           <SelectInput
@@ -706,7 +664,7 @@ const AddOrEditPatients = () => {
                 visaTypeId: val,
                 visaTypeName: VISA_ID_TO_LABEL[val] || "",
               }));
-              setErrors((prev) => ({ ...prev, visaType: "" })); // <--- clear error
+              setErrors((prev) => ({ ...prev, visaType: "" }));
             }}
             errorText={errors.visaType}
             required
@@ -718,6 +676,8 @@ const AddOrEditPatients = () => {
             onChange={(d) => update("visaExpiry")(d)}
             errorText={errors.visaExpiry}
             required
+            disabledDate={disabledPastAndToday} // only future dates
+            format={DATE_FORMAT} // MM-DD-YYYY
           />
 
           <DateField
@@ -727,6 +687,7 @@ const AddOrEditPatients = () => {
             errorText={errors.lastEntry}
             required
             disabledDate={disabledTodayAndFuture}
+            format={DATE_FORMAT} // MM-DD-YYYY
           />
         </div>
 
@@ -737,14 +698,13 @@ const AddOrEditPatients = () => {
           <SelectInput
             title="Zip Code"
             placeholder="Search Zip Code"
-            options={zipOptions} // [{label, value}]
+            options={zipOptions}
             value={form.zipCodeId ?? null}
-            onChange={handleZipChange} // keeps zipCodeId + zip label
+            onChange={handleZipChange}
             showSearch
             allowClear
-            // Remote search hooks
-            filterOption={false} // don't filter on client
-            onSearch={handleZipSearch} // debounce + API
+            filterOption={false}
+            onSearch={handleZipSearch}
             onFocus={handleZipFocus}
             onClear={handleZipClear}
             loading={zipLoading}
@@ -819,7 +779,7 @@ const AddOrEditPatients = () => {
             value={files.prescription}
             onChange={(f) => {
               setFiles((p) => ({ ...p, prescription: f }));
-              if (f?.length) clearError("prescriptions"); // note the key name
+              if (f?.length) clearError("prescriptions");
             }}
             required
             multiple
@@ -831,8 +791,10 @@ const AddOrEditPatients = () => {
             <p className="note">Note: PDF / JPG / PNG file is allowed!</p>
           </div>
           <div className="actions_right">
-            {" "}
-            <ButtonComponent variant="danger">Cancel</ButtonComponent>
+            {/* UPDATED: Cancel now navigates to /patients */}
+            <ButtonComponent variant="danger" onClick={handleBack}>
+              Cancel
+            </ButtonComponent>
             <ButtonComponent variant="primary" onClick={handleSubmit}>
               {isEdit ? "Update" : "Save"}
             </ButtonComponent>

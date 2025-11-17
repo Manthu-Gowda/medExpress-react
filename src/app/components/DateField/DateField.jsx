@@ -11,7 +11,7 @@ const DateField = ({
   value,                 // dayjs | null
   onChange,              // (dayjs|null,dateString) => void
   name,
-  placeholder = "DD - MM - YYYY",
+  placeholder = "MM - DD - YYYY",
   required = false,
   disabled = false,
   errorText = "",

@@ -6,6 +6,8 @@ import "./Patients.scss";
 import { GET_ALL_PATIENTS } from "../../../utils/apiPath";
 import { postApi } from "../../../utils/apiService";
 import Loader from "../../../components/Loader/Loader";
+import NoDataImg from "../../../assets/NoData.png";
+import ButtonComponent from "../../../components/ButtonComponent/ButtonComponent";
 
 const Patients = () => {
   const navigate = useNavigate();
@@ -45,15 +47,22 @@ const Patients = () => {
 
       {/* Your page body */}
       <section className="patients_sec">
-        <PatientsGrid
-          items={patientsData}
-          selectedId={selectedId}
-          onSelect={(p) => setSelectedId(p.id)}
-          onEdit={(p) => navigate(`/edit-patient/${p.id}`)}
-          // onVisa={onVisa}
-          // onPassport={onPassport}
-          // onPrescriptions={onPrescriptions}
-        />
+        {patientsData.length === 0 ? (
+          <div className="noData">
+            <img src={NoDataImg} alt="No Patients" />
+            <p>No Patients Added Yet! Please Add Patients.</p>
+            <ButtonComponent onClick={handleAddPatients}>
+              Add Patient
+            </ButtonComponent>
+          </div>
+        ) : (
+          <PatientsGrid
+            items={patientsData}
+            selectedId={selectedId}
+            onSelect={(p) => setSelectedId(p.id)}
+            onEdit={(p) => navigate(`/edit-patient/${p.id}`)}
+          />
+        )}
       </section>
     </div>
   );

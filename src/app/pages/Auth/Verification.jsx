@@ -65,7 +65,7 @@ export default function Verification() {
         navigate("/");
       } else {
         setIsLoading(false);
-        errorToast(message || "Invalid OTP. Please try again.");
+        errorToast(message);
       }
     }
   };
@@ -73,14 +73,17 @@ export default function Verification() {
   const handleResend = async () => {
     if (!email) return;
     setIsResending(true);
+    setIsLoading(true);
     const { statusCode, data, message } = await postApi(RESEND_REGISTER_OTP, {
       email,
     });
     if (statusCode === 200) {
       setIsResending(false);
+      setIsLoading(false);
       successToast(message || "OTP resent to your email.");
     } else {
       setIsResending(false);
+      setIsLoading(false);
       errorToast(data?.message || "Unable to resend OTP. Try again later.");
     }
   };

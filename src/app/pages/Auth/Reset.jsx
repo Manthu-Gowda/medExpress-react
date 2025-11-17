@@ -8,6 +8,7 @@ import { RESET_PASSWORD } from "../../utils/apiPath";
 import { postApi } from "../../utils/apiService";
 import { errorToast, successToast } from "../../services/ToastHelper";
 import { useLocation, useNavigate } from "react-router-dom";
+import Loader from "../../components/Loader/Loader";
 
 const initialValues = {
   password: "",
@@ -17,6 +18,7 @@ const initialValues = {
 export default function Reset() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
   const searchParams = new URLSearchParams(location.search);
 
   // Extract email & token from URL
@@ -36,7 +38,6 @@ export default function Reset() {
   const [token] = useState(tokenFromUrl);
   const [form, setForm] = useState(initialValues);
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!email || !token) {
@@ -74,6 +75,7 @@ export default function Reset() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     if (validateFields()) {
       setIsLoading(true);
       const payload = {
@@ -85,15 +87,18 @@ export default function Reset() {
       setIsLoading(false);
       if (statusCode === 200) {
         successToast("Password reset successful! Please sign in.");
+        setIsLoading(false);
         navigate("/");
       } else {
-        errorToast(message || "Failed to reset password.");
+        setIsLoading(false);
+        errorToast(message);
       }
     }
   };
 
   return (
     <AuthLayout>
+      {isLoading && <Loader />}
       <div className="login-card">
         <h1 className="title">Set New Password</h1>
         <p className="subtitle">

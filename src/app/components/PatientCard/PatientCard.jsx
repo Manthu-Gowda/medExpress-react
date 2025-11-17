@@ -66,6 +66,10 @@ const stop = (fn) => (e) => {
   fn?.();
 };
 
+const truncateName = (name = "", max = 25) => {
+  if (!name) return "";
+  return name.length > max ? name.slice(0, max) + "..." : name;
+};
 // Normalize prescriptions into [{ url, name }]
 const normalizeDocs = (value) => {
   // support: array of objects, array of strings, string, single object
@@ -203,27 +207,30 @@ const PatientCard = ({
     <div style={{ minWidth: 260 }}>
       <div style={{ fontWeight: 600, marginBottom: 8 }}>Prescriptions</div>
       <ul
-        style={{ paddingLeft: 18, margin: 0, maxHeight: 240, overflow: "auto" }}
+        style={{ paddingLeft: 10, margin: 0, maxHeight: 240, overflow: "auto" }}
       >
-        {prescriptionDocs.map((doc, idx) => (
-          <li key={doc.url + idx} style={{ marginBottom: 6 }}>
-            <a
-              href={doc.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                openNewTab(doc.url);
-                closePrescPopover();
-              }}
-              title={doc.name}
-              style={{ wordBreak: "break-all" }}
-            >
-              {doc.name}
-            </a>
-          </li>
-        ))}
+        {prescriptionDocs.map((doc, idx) => {
+          const displayName = truncateName(doc.name || `File ${idx + 1}`, 25);
+          return (
+            <li key={doc.url + idx} style={{ marginBottom: 6 }}>
+              <a
+                href={doc.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  openNewTab(doc.url);
+                  closePrescPopover();
+                }}
+                title={doc.name} // full name in tooltip
+                style={{ wordBreak: "break-all" }}
+              >
+                {displayName} {/* truncated in UI */}
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

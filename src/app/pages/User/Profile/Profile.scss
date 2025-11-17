@@ -77,6 +77,7 @@
   border: 1px solid $primary_border;
   border-radius: 12px;
   overflow: hidden;
+  position: relative;
 
   &__header {
     padding: 14px;
@@ -97,6 +98,12 @@
       gap: 10px; // space between Cancel & Save
     }
   }
+  &__footer {
+    padding: 14px;
+  }
+}
+.actions--mobile {
+  display: none;
 }
 
 /* ---- Personal Info blocks ---- */
@@ -180,5 +187,23 @@
   .piGrid--summary,
   .piGrid--form {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .card__header .actions--desktop {
+    display: none; // hide top Save/Cancel on small screens
+  }
+  .card__footer.actions--mobile {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+
+    position: sticky;
+    bottom: 0;
+    padding: 12px 16px;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    z-index: 10;
   }
 }
