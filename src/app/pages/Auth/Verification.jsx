@@ -1,5 +1,5 @@
-// src/pages/Auth/Login.jsx
-import { useEffect, useMemo, useState } from "react";
+// src/pages/Auth/Verification.jsx
+import { useEffect, useMemo, useState, useCallback } from "react";
 import "./AuthStyles.scss";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import AuthLayout from "../../components/AuthLayout/AuthLayout";
@@ -9,10 +9,12 @@ import Loader from "../../components/Loader/Loader";
 import { RESEND_REGISTER_OTP, VERIFY_REGISTER_OTP } from "../../utils/apiPath";
 import { postApi } from "../../utils/apiService";
 import { errorToast, successToast } from "../../services/ToastHelper";
+import { saveAuthToSession } from "../../services/auth";
 
 export default function Verification() {
   const location = useLocation();
   const navigate = useNavigate();
+
   const emailFromState = location?.state?.email || "";
   const cachedEmail =
     typeof window !== "undefined" ? sessionStorage.getItem("pendingEmail") : "";
@@ -20,6 +22,9 @@ export default function Verification() {
     () => emailFromState || cachedEmail || "",
     [emailFromState, cachedEmail]
   );
+
+  const from = location?.state?.from || ""; 
+
   const [form, setForm] = useState({ otp: "" });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -28,13 +33,12 @@ export default function Verification() {
   useEffect(() => {
     if (!email) {
       errorToast("Missing email. Please register again.");
-      navigate("/signup"); // or back to signup
+      navigate("/signup");
     }
   }, [email, navigate]);
 
   const handleOTPChange = (e) => {
     const { name, value } = e.target;
-    // allow only digits, max 4
     const nextVal = value.replace(/\D/g, "").slice(0, 4);
 
     setForm((prev) => ({ ...prev, [name]: nextVal }));
@@ -49,20 +53,27 @@ export default function Verification() {
     setErrors(next);
     return Object.keys(next).length === 0;
   };
-
-  const handleSubmit = async () => {
+  
+  const handleVerifyOTP = async () => {
     if (validateOTP()) {
       setIsLoading(true);
       const payload = { email, otp: form.otp };
+
       const { statusCode, data, message } = await postApi(
         VERIFY_REGISTER_OTP,
         payload
       );
+
       if (statusCode === 200) {
         successToast(message || "OTP verified successfully!");
         sessionStorage.removeItem("pendingEmail");
         setIsLoading(false);
-        navigate("/");
+        saveAuthToSession(data);
+        const role = Array.isArray(data.roles) ? data.roles[0] : data.role;
+        console.log("role", role);
+        if (role === "Admin") navigate("/dashboard");
+        else if (role === "User") navigate("/patients");
+        else navigate("/");
       } else {
         setIsLoading(false);
         errorToast(message);
@@ -70,13 +81,17 @@ export default function Verification() {
     }
   };
 
-  const handleResend = async () => {
+  const handleResend = useCallback(async () => {
+    setForm({ otp: "" });
     if (!email) return;
+
     setIsResending(true);
     setIsLoading(true);
+
     const { statusCode, data, message } = await postApi(RESEND_REGISTER_OTP, {
       email,
     });
+
     if (statusCode === 200) {
       setIsResending(false);
       setIsLoading(false);
@@ -86,7 +101,14 @@ export default function Verification() {
       setIsLoading(false);
       errorToast(data?.message || "Unable to resend OTP. Try again later.");
     }
-  };
+  }, [email]);
+
+  // 🚀 AUTO-CALL RESEND ONLY WHEN COMING FROM LOGIN
+  useEffect(() => {
+    if (email && from === "login") {
+      handleResend();
+    }
+  }, [email, from, handleResend]);
 
   return (
     <AuthLayout>
@@ -96,6 +118,7 @@ export default function Verification() {
         <p className="subtitle">
           Please enter the 4-digit code sent to your email
         </p>
+
         <div className="form">
           <OTPField
             title=""
@@ -110,7 +133,7 @@ export default function Verification() {
           <ButtonComponent
             type="submit"
             variant="primary"
-            onClick={handleSubmit}
+            onClick={handleVerifyOTP}
           >
             Verify
           </ButtonComponent>
@@ -130,8 +153,9 @@ export default function Verification() {
               cursor: "pointer",
             }}
             onClick={handleResend}
+            disabled={isResending}
           >
-            Resend It
+            {isResending ? "Resending..." : "Resend It"}
           </button>
         </div>
       </div>

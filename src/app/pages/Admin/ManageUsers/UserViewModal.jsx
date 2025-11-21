@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import dayjs from "dayjs";
 import { DeleteFilled, EditOutlined } from "@ant-design/icons";
 import CustomModal from "../../../components/CustomModal/CustomModal";
-import "./MemberViewModal.scss";
+import "./UserViewModal.scss";
 import SampleUser from "../../../assets/SampleUser.jpg";
 import ButtonComponent from "../../../components/ButtonComponent/ButtonComponent";
 import { Popover } from "antd";
@@ -19,7 +19,7 @@ const formatDate = (value) => {
   return dayjs(value).format("DD MMM, YYYY");
 };
 
-const MemberViewModal = ({ open, onClose, member }) => {
+const UserViewModal = ({ open, onClose, member }) => {
   const [prescPopoverOpenId, setPrescPopoverOpenId] = useState(null);
   const hasMember = !!member;
 
@@ -38,7 +38,7 @@ const MemberViewModal = ({ open, onClose, member }) => {
     <CustomModal
       open={open}
       onClose={onClose}
-      title="Member"
+      title="User Patients"
       showPrimary={false}
       showDanger={false}
       width={920}
@@ -62,7 +62,7 @@ const MemberViewModal = ({ open, onClose, member }) => {
                 <div className="mv__muted">{member.email}</div>
                 <div className="mv__muted">{memberAddress}</div>
               </div>
-              <div className="mv__sectionActions">
+              {/* <div className="mv__sectionActions">
                 <button
                   type="button"
                   className="mv__iconBtn mv__iconBtn--danger"
@@ -70,7 +70,7 @@ const MemberViewModal = ({ open, onClose, member }) => {
                 >
                   <DeleteFilled />
                 </button>
-              </div>
+              </div> */}
             </div>
           </section>
 
@@ -133,13 +133,13 @@ const MemberViewModal = ({ open, onClose, member }) => {
                             <div className="mv__muted">{p.email}</div>
                           </div>
                         </div>
-                        <button
+                        {/* <button
                           type="button"
                           className="mv__iconBtn"
                           title="Edit"
                         >
                           <EditOutlined />
-                        </button>
+                        </button> */}
                       </header>
 
                       <div className="mv__address">{patientAddress}</div>
@@ -217,4 +217,4 @@ const MemberViewModal = ({ open, onClose, member }) => {
   );
 };
 
-export default MemberViewModal;
+export default UserViewModal;

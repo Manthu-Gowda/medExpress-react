@@ -61,7 +61,10 @@
     font-size: 13px;
     color: #7e8aa6;
   }
-
+ &__center {
+    flex: 1; 
+    max-width: 400px;
+  }
   &__right {
     display: inline-flex;
     align-items: center;

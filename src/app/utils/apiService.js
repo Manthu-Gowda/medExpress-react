@@ -21,6 +21,7 @@ axios.interceptors.response.use(
       if (
         response?.data?.statusCode === 400 ||
         response?.data?.statusCode === 401 ||
+        response?.data?.statusCode === 402 ||
         response?.data?.statusCode === 404 ||
         response?.data?.statusCode === 409 ||
         response?.data?.statusCode === 204 ||

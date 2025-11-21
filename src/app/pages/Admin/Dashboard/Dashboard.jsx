@@ -31,25 +31,30 @@ const Dashboard = () => {
 
   const cards = [
     {
-      title: "Total Users",
-      value: dashboardData.totalPatientsCount ?? 0,
+      title: "Total Members",
+      value: dashboardData.totalMembersCount ?? 0,
       Icon: PatientsIcon,
     },
-    {
-      title: "Total Medical Shippers",
-      value: dashboardData.totalMembersCount ?? 0,
-      Icon: MedicalShippersIcon,
-    },
+    // {
+    //   title: "Total Medical Shippers",
+    //   value: dashboardData.totalMembersCount ?? 0,
+    //   Icon: MedicalShippersIcon,
+    // },
     {
       title: "Active Subscriptions",
       value: dashboardData.totalActiveSubscriptionsCount ?? 0,
       Icon: CardIcon,
     },
     {
-      title: "Pending Assignees",
-      value: 425,
-      Icon: PendingIcon,
+      title: "Total Patients",
+      value: dashboardData.totalPatientsCount ?? 0,
+      Icon: PatientsIcon,
     },
+    // {
+    //   title: "Pending Assignees",
+    //   value: 425,
+    //   Icon: PendingIcon,
+    // },
   ];
 
   return (

@@ -2,14 +2,19 @@
 
 .mm {
   &_sec {
+    .mm__tableWrapper {
+      width: 100%;
+      overflow-x: auto; 
+      overflow-y: visible;
+    }
     .ant-table-container {
       border-radius: 12px;
-      overflow: hidden;
       border: 1px solid $primary_border;
     }
 
     .ant-table {
       background: $primary_white;
+      // min-width: 700px; 
     }
 
     /* header */
@@ -19,6 +24,7 @@
       font-weight: 600;
       border-bottom: 1px solid $primary_border;
       padding: 14px 16px;
+      white-space: nowrap; 
     }
 
     /* body cells */
@@ -27,6 +33,7 @@
       border-bottom: 1px solid $primary_border;
       color: $primary_text;
       vertical-align: middle;
+      white-space: nowrap; 
     }
 
     /* row hover */

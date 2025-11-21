@@ -66,34 +66,43 @@ export default function Login() {
     return data;
   };
 
-const handleSubmit = async () => {
+const handleLogin = async () => {
   if (validateFields()) {
     setIsLoading(true);
+
     const payload = {
       email: login.email,
       password: login.password,
     };
-    
+
     const { statusCode, data, message } = await postApi(USER_LOGIN, payload);
+
     if (statusCode === 200) {
       saveAuthToSession(data);
-      setIsLoading(false);
       successToast("Successfully Logged In");
-      const role = Array.isArray(data.roles) ? data.roles[0] : data.role;
-      if (role === "Admin") {
-        navigate("/dashboard");
-      } else if (role === "User") {
-        navigate("/patients");
-      } else {
-        navigate("/");
-      }
 
+      const role = Array.isArray(data.roles) ? data.roles[0] : data.role;
+      if (role === "Admin") navigate("/dashboard");
+      else if (role === "User") navigate("/patients");
+      else navigate("/");
+    } 
+    // 🔥 Unverified user
+    else if (statusCode === 402) {
+      sessionStorage.setItem("pendingEmail", login.email);
+      setIsLoading(false);
+      navigate("/verification", { 
+        state: { 
+          email: login.email,
+          from: "login",       // 👈 IMPORTANT
+        },
+      });
     } else {
       setIsLoading(false);
       errorToast(message);
     }
   }
 };
+
 
   // STEP 1: Get Google login URL and redirect
   const handleGoogleLogin = async () => {
@@ -137,7 +146,7 @@ const handleSubmit = async () => {
             errorText={errors.email}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                handleSubmit();
+                handleLogin();
               }
             }}
           />
@@ -153,7 +162,7 @@ const handleSubmit = async () => {
             errorText={errors.password}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                handleSubmit();
+                handleLogin();
               }
             }}
           />
@@ -168,7 +177,7 @@ const handleSubmit = async () => {
           <ButtonComponent
             type="submit"
             variant="primary"
-            onClick={handleSubmit}
+            onClick={handleLogin}
           >
             Sign In
           </ButtonComponent>

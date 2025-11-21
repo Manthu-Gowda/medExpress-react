@@ -5,6 +5,7 @@ import "./PatientCard.scss";
 import EditIcon from "../../assets/icons/EditIcon";
 import EyeIcon from "../../assets/icons/EyeIcon";
 import ButtonComponent from "../ButtonComponent/ButtonComponent";
+import { formatMMDDYYYY } from "../../services/dateFormatter";
 
 const extractUrl = (item) => {
   if (!item) return "";
@@ -105,6 +106,7 @@ const PatientCard = ({
   onPrescriptions,
   isSelected = false,
   className = "",
+  showEdit = true,
 }) => {
   const {
     name,
@@ -250,23 +252,28 @@ const PatientCard = ({
       >
         <header className="pc__header">
           <h3 className="pc__title">{name}</h3>
-          <button
-            type="button"
-            className="pc__edit"
-            aria-label={`Edit ${name}`}
-            onClick={onEdit}
-          >
-            <EditIcon />
-          </button>
+          {showEdit && onEdit && (
+            <button
+              type="button"
+              className="pc__edit"
+              aria-label={`Edit ${name}`}
+              onClick={onEdit}
+            >
+              <EditIcon />
+            </button>
+          )}
         </header>
 
         <div className="pc__body">
           <Row label="Ph No:" value={countryCode + "  " + phoneNumber} />
           <Row label="E Mail:" value={email} />
-          <Row label="DOB:" value={dateOfBirth} />
+          <Row label="DOB:" value={formatMMDDYYYY(dateOfBirth)} />
           <Row label="Visa Type:" value={visaTypeName} />
-          <Row label="Visa Exp Date:" value={visaExpiryDate} />
-          <Row label="USA Last Entry Date:" value={usaLastEntryDate} />
+          <Row label="Visa Exp Date:" value={formatMMDDYYYY(visaExpiryDate)} />
+          <Row
+            label="USA Last Entry Date:"
+            value={formatMMDDYYYY(usaLastEntryDate)}
+          />
           <Row label="Location:" value={addressLine} />
         </div>
 
@@ -377,6 +384,7 @@ PatientCard.propTypes = {
   onPrescriptions: PropTypes.func,
   isSelected: PropTypes.bool,
   className: PropTypes.string,
+  showEdit: PropTypes.bool,
 };
 
 export default PatientCard;

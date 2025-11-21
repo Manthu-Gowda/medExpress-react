@@ -40,8 +40,8 @@ const CustomModal = ({
       centered={centered}
       maskClosable={maskClosable}
       destroyOnHidden={destroyOnHidden}
-      footer={null}             // we render a custom footer
-      closable={false}          // hide default; we make our own close
+      footer={null}           
+      closable={false}          
       onCancel={onClose}
       className={`appModal ${className}`}
     >

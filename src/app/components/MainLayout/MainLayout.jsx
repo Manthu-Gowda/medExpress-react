@@ -52,7 +52,6 @@ const MENUS_BY_ROLE = {
     },
   ],
   Admin: [
-    // Example admin menu; adjust to your actual admin routes
     {
       key: "dashboard",
       text: "Dashboard",
@@ -60,10 +59,16 @@ const MENUS_BY_ROLE = {
       path: "/dashboard",
     },
     {
-      key: "manage-members",
-      text: "Manage Members",
+      key: "manage-users",
+      text: "Manage Users",
       icon: <PatientsIcon />,
-      path: "/manage-members",
+      path: "/manage-users",
+    },
+     {
+      key: "admin-patients",
+      text: "Manage Patients",
+      icon: <PatientsIcon />,
+      path: "/admin-patients",
     },
     {
       key: "medical-shippers",

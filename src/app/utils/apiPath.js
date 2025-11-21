@@ -42,6 +42,9 @@ export const GET_DASHBOARD_DATA = "admin/Dashboard/GetDashboard";
 export const GET_MEMBERS_DATA = "admin/Members/GetMembers";
 export const GET_MEMBER_DATA = "admin/Members/GetMember";
 
+//Patients
+export const GET_ALL_ADMIN_PATIENTS = "admin/Patients/GetPatientsForAdmin";
+
 
 
 

@@ -83,24 +83,27 @@ const MedicalShippers = () => {
       />
 
       <section className="ms_sec">
-        <Table
-          rowKey="id"
-          loading={isLoading}
-          columns={columns}
-          dataSource={data}
-          pagination={{
-            current: page,
-            pageSize,
-            total: data.length,
-            showSizeChanger: false,
-            itemRender: (pageItem, type, originalElement) => {
-              if (type === "prev") return <a>« Previous</a>;
-              if (type === "next") return <a>Next »</a>;
-              return originalElement;
-            },
-          }}
-          onChange={(pg) => setPage(pg.current)}
-        />
+        <div className="mm__tableWrapper">
+          <Table
+            rowKey="id"
+            loading={isLoading}
+            columns={columns}
+            dataSource={data}
+            scroll={{ x: "max-content" }}
+            pagination={{
+              current: page,
+              pageSize,
+              total: data.length,
+              showSizeChanger: false,
+              itemRender: (pageItem, type, originalElement) => {
+                if (type === "prev") return <a>« Previous</a>;
+                if (type === "next") return <a>Next »</a>;
+                return originalElement;
+              },
+            }}
+            onChange={(pg) => setPage(pg.current)}
+          />
+        </div>
       </section>
 
       {/* Modal */}

@@ -1,0 +1,17 @@
+@use "../../globalStyles" as *;
+
+.search-input {
+  width: 100%;
+  .ant-input {
+    font-size: 16px;
+    height: 40px;
+    box-shadow: 0px 0px 2px 0px #00000040;
+    color: $secondary_text;
+    padding-left: 32px; 
+  }
+
+  &__icon {
+    font-size: 18px;
+    color: #919cb4;
+  }
+}

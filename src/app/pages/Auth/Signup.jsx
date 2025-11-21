@@ -81,11 +81,12 @@ export default function SignUp() {
     return data;
   };
 
-  const handleSubmit = async () => {
+  const handleSignup = async () => {
     if (!agreeTerms) {
       errorToast("Please accept the Terms & Conditions before proceeding.");
       return;
     }
+
     if (validateFields()) {
       setIsLoading(true);
       const payload = {
@@ -93,12 +94,19 @@ export default function SignUp() {
         email: login.email,
         password: login.password,
       };
+
       const { statusCode, message } = await postApi(REGISTER, payload);
+
       if (statusCode === 200) {
         sessionStorage.setItem("pendingEmail", login.email);
         setIsLoading(false);
         successToast(message);
-        navigate("/verification", { state: { email: login.email } });
+        navigate("/verification", {
+          state: {
+            email: login.email,
+            from: "signup", // 👈 DIFFERENT FLAG
+          },
+        });
       } else {
         setIsLoading(false);
         errorToast(message);
@@ -147,7 +155,7 @@ export default function SignUp() {
             errorText={errors.username}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                handleSubmit();
+                handleSignup();
               }
             }}
           />
@@ -162,7 +170,7 @@ export default function SignUp() {
             errorText={errors.email}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                handleSubmit();
+                handleSignup();
               }
             }}
           />
@@ -178,7 +186,7 @@ export default function SignUp() {
             errorText={errors.password}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                handleSubmit();
+                handleSignup();
               }
             }}
           />
@@ -193,7 +201,7 @@ export default function SignUp() {
             errorText={errors.confirmPassword}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                handleSubmit();
+                handleSignup();
               }
             }}
           />
@@ -221,7 +229,7 @@ export default function SignUp() {
           <ButtonComponent
             type="submit"
             variant="primary"
-            onClick={handleSubmit}
+            onClick={handleSignup}
             disabled={!agreeTerms}
           >
             Send OTP

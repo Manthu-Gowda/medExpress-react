@@ -153,24 +153,27 @@ const PendingAssignees = () => {
       </div>
 
       <section className="pa_sec">
-        <Table
-          rowKey="id"
-          loading={isLoading}
-          columns={columns}
-          dataSource={dataSource}
-          pagination={{
-            current: page,
-            pageSize,
-            total: dataSource.length,
-            showSizeChanger: false,
-            itemRender: (_, type, original) => {
-              if (type === "prev") return <a>« Previous</a>;
-              if (type === "next") return <a>Next »</a>;
-              return original;
-            },
-          }}
-          onChange={(pg) => setPage(pg.current)}
-        />
+        <div className="mm__tableWrapper">
+          <Table
+            rowKey="id"
+            loading={isLoading}
+            columns={columns}
+            dataSource={dataSource}
+            scroll={{ x: "max-content" }}
+            pagination={{
+              current: page,
+              pageSize,
+              total: dataSource.length,
+              showSizeChanger: false,
+              itemRender: (_, type, original) => {
+                if (type === "prev") return <a>« Previous</a>;
+                if (type === "next") return <a>Next »</a>;
+                return original;
+              },
+            }}
+            onChange={(pg) => setPage(pg.current)}
+          />
+        </div>
       </section>
 
       {/* Assign only for Pending tab */}
