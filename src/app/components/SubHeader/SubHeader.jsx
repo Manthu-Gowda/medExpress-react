@@ -16,7 +16,7 @@ const SubHeader = ({
   compact = false,
   onClick, // main button click
   showPlusIcon = true,
-
+  showButton = true,
   // search-related props
   showSearch = false,
   searchPlaceholder = "Search...",
@@ -65,10 +65,13 @@ const SubHeader = ({
               />
             </div>
           )}
-          <ButtonComponent variant="main" onClick={onClick}>
-            {showPlusIcon && <PlusIcon />}
-            {buttonText}
-          </ButtonComponent>
+
+          {showButton && (
+            <ButtonComponent variant="main" onClick={onClick}>
+              {showPlusIcon && <PlusIcon />}
+              {buttonText}
+            </ButtonComponent>
+          )}
         </div>
       )}
     </div>

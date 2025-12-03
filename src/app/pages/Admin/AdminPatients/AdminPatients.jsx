@@ -211,7 +211,6 @@ const AdminPatients = () => {
     {
       title: "Sl No",
       dataIndex: "id",
-      width: 90,
       render: (_, __, index) => pad2(pageIndex * pageSize + index + 1),
     },
     {
@@ -241,7 +240,6 @@ const AdminPatients = () => {
     {
       title: "Date of Birth",
       dataIndex: "dateOfBirth",
-      width: 150,
       align: "center",
       render: (value) => formatMMDDYYYY(value),
     },
@@ -253,28 +251,24 @@ const AdminPatients = () => {
     {
       title: "Visa Expiry Date",
       dataIndex: "visaExpiryDate",
-      width: 150,
       align: "center",
       render: (value) => formatMMDDYYYY(value),
     },
     {
       title: "USA Last Entry Date",
       dataIndex: "usaLastEntryDate",
-      width: 150,
       align: "center",
       render: (value) => formatMMDDYYYY(value),
     },
     {
       title: "Created Date",
       dataIndex: "createdDate",
-      width: 150,
       align: "center",
       render: (value) => formatMMDDYYYY(value),
     },
     {
       title: "Last Updated date",
       dataIndex: "lastUpdatedDate",
-      width: 150,
       align: "center",
       render: (value) => formatMMDDYYYY(value),
     },
@@ -329,7 +323,6 @@ const AdminPatients = () => {
     {
       title: "Action",
       key: "action",
-      width: 140,
       align: "center",
       render: (_, record) => (
         <button

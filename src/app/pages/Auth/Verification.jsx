@@ -23,7 +23,7 @@ export default function Verification() {
     [emailFromState, cachedEmail]
   );
 
-  const from = location?.state?.from || ""; 
+  const from = location?.state?.from || "";
 
   const [form, setForm] = useState({ otp: "" });
   const [errors, setErrors] = useState({});
@@ -53,7 +53,7 @@ export default function Verification() {
     setErrors(next);
     return Object.keys(next).length === 0;
   };
-  
+
   const handleVerifyOTP = async () => {
     if (validateOTP()) {
       setIsLoading(true);
@@ -73,6 +73,7 @@ export default function Verification() {
         console.log("role", role);
         if (role === "Admin") navigate("/dashboard");
         else if (role === "User") navigate("/patients");
+        else if (role === "Shipper") navigate("/medical-shipments");
         else navigate("/");
       } else {
         setIsLoading(false);

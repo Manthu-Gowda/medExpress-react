@@ -91,4 +91,31 @@
   color: $primary_white;
   font-weight: 700;
   border: none;
+  cursor: pointer;
+}
+
+.pa__locationCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pa__eyeBtn {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: $brand_color; // or any color you use
+}
+
+.pa__addrPopoverContent {
+  max-width: 320px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: $primary_text;
+  white-space: normal;
 }

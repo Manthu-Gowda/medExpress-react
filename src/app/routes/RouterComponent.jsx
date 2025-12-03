@@ -20,6 +20,9 @@ import Notifications from "../pages/Admin/Notifications/Notifications";
 import Subscription from "../pages/User/Subscription/Subscription";
 import AdminPatients from "../pages/Admin/AdminPatients/AdminPatients";
 import ManageUsers from "../pages/Admin/ManageUsers/ManageUsers";
+import MedicalShipments from "../pages/Shipper/MedicalShipments/MedicalShipments";
+import ShipperProfile from "../pages/Shipper/ShipperProfile/ShipperProfile";
+import PatientDetails from "../pages/Shipper/PatientDetails/PatientDetails";
 
 const AppRoutes = () => (
   <Routes>
@@ -44,6 +47,12 @@ const AppRoutes = () => (
       <Route path="/medical-shippers" element={<MedicalShippers />} />
       <Route path="/pending-assignees" element={<PendingAssignees />} />
       <Route path="/notifications" element={<Notifications />} />
+
+      //Shipper Routes
+      <Route path="/medical-shipments" element={<MedicalShipments />} />
+      <Route path="/shipper-profile" element={<ShipperProfile />} />
+      <Route path="/shipper-patient/:id" element={<PatientDetails />} />
+
     </Route>
   </Routes>
 );

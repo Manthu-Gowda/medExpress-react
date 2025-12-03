@@ -1,0 +1,209 @@
+@use "../../../globalStyles" as *;
+
+.profile {
+  .profile_sec {
+    margin-top: 10px;
+    padding: 16px;
+    background: $primary_white;
+    border: 1px solid $primary_border;
+    border-radius: 16px;
+  }
+}
+
+.uploadActions {
+  display: flex;
+  gap: 8px;
+}
+
+.uploadBtn--ghost {
+  background: transparent;
+  border: 1px solid #e6eef8;
+}
+/* ---- Hero: avatar + upload ---- */
+.profileHero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 6px 6px 24px 6px;
+  border-bottom: 1px solid $primary_border;
+
+  &__avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 999px;
+    overflow: hidden;
+    flex: 0 0 auto;
+    border: 1px solid $primary_border;
+
+    img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+  }
+
+  &__upload {
+    .uploadBtn {
+      border: 1px dashed $primary_border;
+      background: #f7fbff;
+      border-radius: 12px;
+      padding: 8px 14px;
+      font-weight: 700;
+      color: $primary_text;
+
+      &:hover {
+        border-color: $brand_color;
+        color: $brand_color;
+        background: #f0f7ff;
+      }
+    }
+
+    .hint {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      color: $secondary_text;
+      font-size: 12px;
+    }
+  }
+}
+
+/* ---- Card ---- */
+.card {
+  margin-top: 18px;
+  background: $primary_white;
+  border: 1px solid $primary_border;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+
+  &__header {
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid $primary_border;
+
+    h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      color: $primary_text;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px; // space between Cancel & Save
+    }
+  }
+  &__footer {
+    padding: 14px;
+  }
+}
+.actions--mobile {
+  display: none;
+}
+
+/* ---- Personal Info blocks ---- */
+.piGrid {
+  padding: 14px;
+
+  &--tightTop {
+    padding-top: 6px; // smaller than default to mimic Figma
+  }
+
+  &--summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  &--location {
+    padding-top: 0;
+  }
+
+  &--form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+
+    .piCol {
+      // InputField is your component; keep spacing tidy
+      .piFieldLabel {
+        margin: 2px 0 6px;
+        font-size: 12px;
+        font-weight: 700;
+        color: $secondary_text;
+      }
+    }
+  }
+}
+
+.piDivider {
+  height: 1px;
+  background: $primary_border;
+  margin: 10px 14px;
+}
+
+.piCol {
+  .piLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: $secondary_text;
+  }
+
+  .piValue {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 700;
+    color: $primary_text;
+
+    &.accent {
+      color: $primary_text;
+    }
+  }
+
+  &.col-12 {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .piGrid--summary,
+  .piGrid--form {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .profileHero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .piGrid--summary,
+  .piGrid--form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .card__header .actions--desktop {
+    display: none; // hide top Save/Cancel on small screens
+  }
+  .card__footer.actions--mobile {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+
+    position: sticky;
+    bottom: 0;
+    padding: 12px 16px;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    z-index: 10;
+  }
+}

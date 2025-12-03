@@ -1,74 +1,114 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Table } from "antd";
 import SubHeader from "../../../components/SubHeader/SubHeader";
 import Loader from "../../../components/Loader/Loader";
 import NewShipperModal from "./NewShipperModal";
 import "./MedicalShippers.scss";
+import { GET_MEDICAL_SHIPPERS } from "../../../utils/apiPath";
+import { postApi } from "../../../utils/apiService";
+import CustomTable from "../../../components/CustomTable/CustomTable";
+import { formatMMDDYYYY } from "../../../services/dateFormatter";
+import { renderStatusCapsule } from "../../../services/statusCapsule";
+import EyeIcon from "../../../assets/icons/EyeIcon";
 
 const pad2 = (n) => String(n).padStart(2, "0");
 
 const MedicalShippers = () => {
-  const [isLoading] = useState(false);
-  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [open, setOpen] = useState(false);
-  const pageSize = 10;
+  const [shippers, setShippers] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [searchString, setSearchString] = useState("");
 
-  // MOCK DATA — replace with API data
-  const data = useMemo(
-    () =>
-      Array.from({ length: 96 }).map((_, i) => ({
-        id: i + 1,
-        shipperName: "Eduardo Thomaz",
-        phone: "+91 9876543210",
-        email: "eduardothomaz1124@gmail.com",
-        location: "2nd cross, Banashankari, Bengaluru, Karnataka 562127",
-        totalShipments: 134,
-      })),
-    []
-  );
+  useEffect(() => {
+    fetchMedicalShippers();
+  }, [pageIndex, pageSize, searchString]);
+
+  const fetchMedicalShippers = async () => {
+    setIsLoading(true);
+    const payload = {
+      pageIndex,
+      pageSize,
+      searchString: searchString,
+    };
+
+    const { statusCode, data, totalRecords } = await postApi(
+      GET_MEDICAL_SHIPPERS,
+      payload
+    );
+
+    if (statusCode === 200 && data) {
+      setShippers(data);
+      setTotal(totalRecords);
+    }
+
+    setIsLoading(false);
+  };
 
   const columns = [
     {
       title: "Sl No",
       dataIndex: "id",
-      width: 90,
-      render: (_, __, index) => pad2((page - 1) * pageSize + index + 1),
+      render: (_, __, index) => pad2(pageIndex * pageSize + index + 1),
     },
     {
       title: "Shipper Name",
-      dataIndex: "shipperName",
+      dataIndex: "name",
       ellipsis: true,
-      render: (text) => (
-        <button type="button" className="ms__link" title={text}>
-          {text}
-        </button>
-      ),
-    },
-    {
-      title: "Phone Number",
-      dataIndex: "phone",
-      width: 180,
-      render: (t) => <span className="ms__strong">{t}</span>,
     },
     {
       title: "Email",
       dataIndex: "email",
       ellipsis: true,
-      render: (t) => <span className="ms__muted">{t}</span>,
     },
     {
-      title: "Location",
-      dataIndex: "location",
+      title: "Phone Number",
+      dataIndex: "phoneNumber",
       ellipsis: true,
-      render: (t) => <span className="ms__muted">{t}</span>,
+      render: (_, record) => {
+        const code = record.countryCode ? `${record.countryCode}` : "";
+        const phone = record.phoneNumber || "";
+
+        if (!code && !phone) return "-";
+
+        return `${code} ${phone}`.trim();
+      },
     },
     {
-      title: "Total Shipments",
-      dataIndex: "totalShipments",
-      width: 160,
-      align: "center",
+      title: "State",
+      dataIndex: "stateName",
+      ellipsis: true,
+      render: (value) => value?.trim() || "-",
     },
+    {
+      title: "City",
+      dataIndex: "cityName",
+      ellipsis: true,
+      render: (value) => value?.trim() || "-",
+    },
+    // {
+    //   title: "Created Date",
+    //   dataIndex: "createdDate",
+    //   width: 150,
+    //   align: "center",
+    //   render: (value) => formatMMDDYYYY(value),
+    // },
+    // {
+    //   title: "Updated date",
+    //   dataIndex: "updatedDate",
+    //   width: 150,
+    //   align: "center",
+    //   render: (value) => formatMMDDYYYY(value),
+    // },
   ];
+
+  const handleShipperCreated = (newItem) => {
+    console.log("Created:", newItem);
+    setOpen(false);
+    fetchMedicalShippers();
+  };
 
   return (
     <div className="ms">
@@ -84,24 +124,18 @@ const MedicalShippers = () => {
 
       <section className="ms_sec">
         <div className="mm__tableWrapper">
-          <Table
+          <CustomTable
             rowKey="id"
             loading={isLoading}
             columns={columns}
-            dataSource={data}
-            scroll={{ x: "max-content" }}
-            pagination={{
-              current: page,
-              pageSize,
-              total: data.length,
-              showSizeChanger: false,
-              itemRender: (pageItem, type, originalElement) => {
-                if (type === "prev") return <a>« Previous</a>;
-                if (type === "next") return <a>Next »</a>;
-                return originalElement;
-              },
+            dataSource={shippers}
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={(page, size) => {
+              setPageIndex(page - 1);
+              setPageSize(size);
             }}
-            onChange={(pg) => setPage(pg.current)}
           />
         </div>
       </section>
@@ -110,10 +144,7 @@ const MedicalShippers = () => {
       <NewShipperModal
         open={open}
         onClose={() => setOpen(false)}
-        onSubmit={(newItem) => {
-          console.log("Created:", newItem);
-          setOpen(false);
-        }}
+        onSubmit={handleShipperCreated}
       />
     </div>
   );

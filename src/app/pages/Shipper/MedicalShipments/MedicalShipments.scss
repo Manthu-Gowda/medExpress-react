@@ -1,0 +1,322 @@
+@use "../../../globalStyles" as *;
+
+.ap {
+  &_sec {
+    .mm__tableWrapper {
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: visible;
+    }
+    .ant-table-container {
+      border-radius: 12px;
+      border: 1px solid $primary_border;
+    }
+
+    .ant-table {
+      background: $primary_white;
+      // min-width: 700px;
+    }
+
+    /* header */
+    .ant-table-thead > tr > th {
+      background: $primary_bg;
+      color: $secondary_text;
+      font-weight: 600;
+      border-bottom: 1px solid $primary_border;
+      padding: 14px 16px;
+      white-space: nowrap;
+    }
+
+    /* body cells */
+    .ant-table-tbody > tr > td {
+      padding: 14px 16px;
+      border-bottom: 1px solid $primary_border;
+      color: $primary_text;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    /* row hover */
+    .ant-table-tbody > tr:hover > td {
+      background: rgba($brand_color, 0.04);
+    }
+
+    /* clickable name like link */
+    .mm__name {
+      all: unset;
+      color: $brand_color;
+      cursor: pointer;
+      font-weight: 600;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .mm__muted {
+      color: $secondary_text;
+    }
+
+    /* action circular button */
+    .mm__iconbtn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba($brand_color, 0.12);
+      border: 1px solid rgba($brand_color, 0.3);
+      transition: transform 0.12s ease, background 0.12s ease;
+      cursor: pointer;
+
+      &:hover {
+        transform: translateY(-1px);
+        background: rgba($brand_color, 0.18);
+      }
+    }
+
+    /* pagination match (blue active, rounded) */
+    .ant-pagination {
+      margin: 12px 8px;
+    }
+
+    .ant-pagination-item {
+      border-radius: 6px;
+      border: 1px solid $primary_border;
+    }
+
+    .ant-pagination-item-active {
+      background: $brand_color;
+      border-color: $brand_color;
+
+      a {
+        color: $primary_white !important;
+      }
+    }
+
+    .ant-pagination-prev .ant-pagination-item-link,
+    .ant-pagination-next .ant-pagination-item-link {
+      border-radius: 6px;
+      border: 1px solid $primary_border;
+      color: $brand_color;
+    }
+  }
+}
+
+/* Docs badge + popover using project colors */
+
+.ap__docBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid $primary_border;
+  background: $primary_bg;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ap__docBadge svg {
+  font-size: 14px;
+}
+
+.ap__docBadgeText {
+  font-weight: 500;
+  color: $primary_text;
+}
+
+.ap__docBadge:hover {
+  background: rgba($brand_color, 0.06);
+  border-color: rgba($brand_color, 0.6);
+  box-shadow: 0 2px 8px rgba(1, 32, 71, 0.08);
+}
+
+.ap__docBadge--disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ap__docPopoverWrapper .ant-popover-inner {
+  padding: 10px 10px 8px;
+  border-radius: 12px;
+  background: $primary_white;
+  border: 1px solid $primary_border;
+}
+
+.ap__docPopover {
+  min-width: 260px;
+  max-width: 320px;
+}
+
+.ap__docRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  border-radius: 10px;
+  background: $primary_bg;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.ap__docRow:last-child {
+  margin-bottom: 0;
+}
+
+.ap__docRow:hover {
+  background: rgba($brand_color, 0.06);
+  border-color: rgba($brand_color, 0.6);
+}
+
+.ap__docType {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba($brand_color, 0.12);
+  color: $brand_color;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.ap__docName {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: $brand_color;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Drawer styling */
+
+.ap__drawer {
+  .ant-drawer-body {
+    padding: 20px 24px 24px;
+    background: $primary_bg;
+  }
+
+  .ant-drawer-content {
+    border-left: 1px solid $primary_border;
+  }
+}
+
+.apDrawer__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: $primary_white;
+  border: 1px solid $primary_border;
+}
+
+.apDrawer__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba($brand_color, 0.08);
+  color: $brand_color;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.apDrawer__headline h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: $primary_text;
+  margin: 0 0 2px;
+}
+
+.apDrawer__headline p {
+  margin: 0;
+  font-size: 13px;
+  color: $secondary_text;
+}
+
+.apDrawer__chip {
+  display: inline-flex;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba($brand_color, 0.08);
+  color: $brand_color;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.apDrawer__divider {
+  margin: 16px 0;
+}
+
+.apDrawer__section {
+  margin-bottom: 16px;
+
+  h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: $secondary_text;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+}
+
+.apDrawer__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+
+.apDrawer__item {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: $primary_white;
+  border: 1px solid $primary_border;
+}
+
+.apDrawer__label {
+  display: block;
+  font-size: 11px;
+  color: $secondary_text;
+  margin-bottom: 2px;
+}
+
+.apDrawer__value {
+  font-size: 13px;
+  color: $primary_text;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.apDrawer__addressCard {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: $primary_white;
+  border: 1px solid $primary_border;
+}
+
+.apDrawer__address {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: $primary_text;
+}
+
+.apDrawer__docsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

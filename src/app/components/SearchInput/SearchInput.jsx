@@ -48,7 +48,7 @@ const SearchInput = ({
   };
 
   return (
-    // <div className={`search-input ${className}`}>
+    <div className={`search-input ${className}`}>
       <Input
         value={innerValue}
         onChange={handleChange}
@@ -58,7 +58,7 @@ const SearchInput = ({
         allowClear={allowClear}
         prefix={<SearchOutlined />}
       />
-    // </div>
+    </div>
   );
 };
 

@@ -64,7 +64,7 @@ const MENUS_BY_ROLE = {
       icon: <PatientsIcon />,
       path: "/manage-users",
     },
-     {
+    {
       key: "admin-patients",
       text: "Manage Patients",
       icon: <PatientsIcon />,
@@ -87,6 +87,20 @@ const MENUS_BY_ROLE = {
       text: "Notifications",
       icon: <NotificationSideNavIcon />,
       path: "/notifications",
+    },
+  ],
+  Shipper: [
+    {
+      key: "medical-shipments",
+      text: "Medical Shipments",
+      icon: <MedicalShippersIcon />,
+      path: "/medical-shipments",
+    },
+    {
+      key: "shipper-profile",
+      text: "Profile",
+      icon: <ProfileIcon />,
+      path: "/shipper-profile",
     },
   ],
 };

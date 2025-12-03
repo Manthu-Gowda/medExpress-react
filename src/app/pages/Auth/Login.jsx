@@ -66,43 +66,43 @@ export default function Login() {
     return data;
   };
 
-const handleLogin = async () => {
-  if (validateFields()) {
-    setIsLoading(true);
+  const handleLogin = async () => {
+    if (validateFields()) {
+      setIsLoading(true);
 
-    const payload = {
-      email: login.email,
-      password: login.password,
-    };
+      const payload = {
+        email: login.email,
+        password: login.password,
+      };
 
-    const { statusCode, data, message } = await postApi(USER_LOGIN, payload);
+      const { statusCode, data, message } = await postApi(USER_LOGIN, payload);
 
-    if (statusCode === 200) {
-      saveAuthToSession(data);
-      successToast("Successfully Logged In");
+      if (statusCode === 200) {
+        saveAuthToSession(data);
+        successToast("Successfully Logged In");
 
-      const role = Array.isArray(data.roles) ? data.roles[0] : data.role;
-      if (role === "Admin") navigate("/dashboard");
-      else if (role === "User") navigate("/patients");
-      else navigate("/");
-    } 
-    // 🔥 Unverified user
-    else if (statusCode === 402) {
-      sessionStorage.setItem("pendingEmail", login.email);
-      setIsLoading(false);
-      navigate("/verification", { 
-        state: { 
-          email: login.email,
-          from: "login",       // 👈 IMPORTANT
-        },
-      });
-    } else {
-      setIsLoading(false);
-      errorToast(message);
+        const role = Array.isArray(data.roles) ? data.roles[0] : data.role;
+        if (role === "Admin") navigate("/dashboard");
+        else if (role === "User") navigate("/patients");
+        else if (role === "Shipper") navigate("/medical-shipments");
+        else navigate("/");
+      }
+      // 🔥 Unverified user
+      else if (statusCode === 402) {
+        sessionStorage.setItem("pendingEmail", login.email);
+        setIsLoading(false);
+        navigate("/verification", {
+          state: {
+            email: login.email,
+            from: "login", // 👈 IMPORTANT
+          },
+        });
+      } else {
+        setIsLoading(false);
+        errorToast(message);
+      }
     }
-  }
-};
-
+  };
 
   // STEP 1: Get Google login URL and redirect
   const handleGoogleLogin = async () => {

@@ -1,0 +1,183 @@
+@use "../../../globalStyles" as *;
+
+.pd__hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  border-radius: 16px;
+}
+
+.pd__heroLeft {
+  display: flex;
+  gap: 16px;
+}
+
+.pd__avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.pd__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pd__info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pd__name {
+  font-size: 18px;
+  font-weight: 600;
+  color: $primary_text;
+  margin-bottom: 4px;
+}
+
+.pd__email {
+  font-size: 14px;
+  color: $secondary_text;
+  margin-bottom: 2px;
+}
+
+.pd__address {
+  font-size: 13px;
+  color: $secondary_text;
+  margin-top: 10px;
+}
+
+.pd__heroRight {
+  display: flex;
+  align-items: center;
+}
+
+.pd__upload {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.pd__uploadBtn {
+  border-radius: 999px;
+  padding: 8px 18px;
+  border: 1px solid $brand_color;
+  background: $brand_color;
+  color: $primary_white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.pd__uploadBtn--primary {
+  background: $brand_color;
+  color: $primary_white;
+}
+
+.pd__uploadBtn--ghost {
+  background: transparent;
+  color: $brand_color;
+  margin-left: 8px;
+}
+
+.pd__uploadActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pd__hint {
+  margin-top: 6px;
+  font-size: 11px;
+  color: $secondary_text;
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.pd__divider {
+  border: none;
+  border-top: 1px solid $primary_border;
+  margin: 24px 0 16px;
+}
+
+.pd__docs {
+  padding: 0 4px;
+}
+
+.pd__docsTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: $primary_text;
+  margin-bottom: 12px;
+}
+
+.pd__docsCard {
+  background: $primary_white;
+  border-radius: 16px;
+  border: 1px solid $primary_border;
+  overflow: hidden;
+}
+
+.pd__docsHeader,
+.pd__docsRow {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr 80px 80px;
+  align-items: center;
+  padding: 12px 20px;
+}
+
+.pd__docsHeader {
+  background: $primary_bg;
+  font-weight: 600;
+  font-size: 13px;
+  color: $primary_text;
+}
+
+.pd__docsRow {
+  font-size: 13px;
+  color: $primary_text;
+}
+
+.pd__docsRow--border {
+  border-top: 1px solid $primary_border;
+}
+
+.pd__docsCol--name {
+  text-align: left;
+}
+
+.pd__docsCol--type {
+  text-align: left;
+}
+
+.pd__docsCol--small {
+  text-align: center;
+}
+
+.pd__docsEmpty {
+  padding: 16px 20px;
+  font-size: 13px;
+  color: $secondary_text;
+}
+
+.pd__iconBtn {
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid $primary_border;
+  background: $primary_bg;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.pd__iconBtn--view {
+  background: rgba($brand_color, 0.08);
+  border-color: rgba($brand_color, 0.16);
+}

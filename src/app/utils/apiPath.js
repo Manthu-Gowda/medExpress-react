@@ -18,7 +18,7 @@ export const GOOGLE_AUTH = "Accounts/GoogleAuthentication";
 
 //Dropdowns
 export const GET_ALL_ZIPCODE = "Dropdowns/GetZipCodeDropdown";
-export const GET_STATE_AND_CITY = "Dropdowns/GetStateAndCityByZipCode"
+export const GET_STATE_AND_CITY = "Dropdowns/GetStateAndCityByZipCode";
 
 //Patients
 export const GET_ALL_PATIENTS = "user/Patients/GetPatients";
@@ -31,8 +31,8 @@ export const DELETE_PATIENT = "user/Patients/DeletePatient";
 export const SUBSCRIPTION_PLANS = "user/SubscriptionPlans/GetSubscriptionPlans";
 export const GET_SUBSCRIPTIONS = "user/Subscriptions/GetSubscriptions";
 export const ADD_SUBSCRIPTIONS = "user/Subscriptions/AddSubscription";
-export const GET_ALL_UNSUBSCRIBED_PATIENTS = "user/Subscriptions/GetUnSubscribedPatients";
-
+export const GET_ALL_UNSUBSCRIBED_PATIENTS =
+  "user/Subscriptions/GetUnSubscribedPatients";
 
 //Admin API's
 //Dashboard
@@ -43,12 +43,19 @@ export const GET_MEMBERS_DATA = "admin/Members/GetMembers";
 export const GET_MEMBER_DATA = "admin/Members/GetMember";
 
 //Patients
-export const GET_ALL_ADMIN_PATIENTS = "admin/Patients/GetPatientsForAdmin";
+export const GET_ALL_ADMIN_PATIENTS = "admin/Patients/GetPatients";
 
+//Medical Shippers
+export const GET_MEDICAL_SHIPPERS = "admin/Shippers/GetShippers";
+export const CREATE_MEDICAL_SHIPPER = "admin/Shippers/AddShipper";
 
+//Assignies
+export const GET_ALL_ASSIGNIES_PATIENTS = "admin/Patients/GetPatients";
+export const ASSIGN_SHIPPER_TO_PATIENT = "admin/Patients/AssignShipperToPatient";
 
-
-
-
+//Shiper API's
+export const GET_ALL_SHIPPER_PATIENTS = "shipper/Patients/GetPatients";
+export const GET_SHIPPER_PATIENT_BY_ID = "shipper/Patients/GetPatient";
+export const UPLOAD_PATIENT_INVOICE = "shipper/Patients/UploadPatientInvoice";
 
 

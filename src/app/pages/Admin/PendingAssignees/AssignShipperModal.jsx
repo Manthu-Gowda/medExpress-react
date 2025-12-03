@@ -1,17 +1,17 @@
-import React, { useMemo, useState } from "react";
+// src/pages/Admin/PendingAssignees/AssignShipperModal.jsx
+import React, { useEffect, useMemo, useState } from "react";
 import CustomModal from "../../../components/CustomModal/CustomModal";
-import InputField from "../../../components/InputField/InputField";
 import SelectInput from "../../../components/SelectInput/SelectInput";
+import SearchInput from "../../../components/SearchInput/SearchInput";
 import { successToast, errorToast } from "../../../services/ToastHelper";
 
 import "./AssignShipperModal.scss";
-
-const MOCK_SHIPPERS = Array.from({ length: 6 }).map((_, i) => ({
-  id: i + 1,
-  name: ["Eduardo Thomaz", "Docia Darlow", "Jaciel Hernandez", "Jean Warren", "Mila Rice", "Omar Nolan"][i],
-  location: "2nd cross, Banashankari, Bengaluru, Karnataka 562127",
-  avatar: `https://i.pravatar.cc/64?img=${i + 22}`,
-}));
+import {
+  ASSIGN_SHIPPER_TO_PATIENT,
+  GET_MEDICAL_SHIPPERS,
+} from "../../../utils/apiPath";
+import { postApi } from "../../../utils/apiService";
+import Loader from "../../../components/Loader/Loader";
 
 const LOCATIONS = [
   { value: "banashankari", label: "Banashankari" },
@@ -25,37 +25,100 @@ const AssignShipperModal = ({ open, onClose, onAssigned, patient }) => {
   const [loc, setLoc] = useState();
   const [assigningId, setAssigningId] = useState(null);
 
+  const [pageIndex, setPageIndex] = useState(0); // 0-based
+  const [pageSize] = useState(100);
+  const [isLoading, setIsLoading] = useState(false);
+  const [shippers, setShippers] = useState([]);
+  const [total, setTotal] = useState(0);
+
+  // the actual term we use for API calls
+  const [searchString, setSearchString] = useState("");
+
+  const buildLocation = (s) => {
+    const parts = [
+      s.address1,
+      s.address2,
+      s.cityName,
+      s.stateName,
+      s.countryName,
+      s.zipCode,
+    ].filter(Boolean);
+
+    return parts.join(", ");
+  };
+
+  const fetchMedicalShippers = async () => {
+    try {
+      if (!open) return; // don't call API when modal is closed
+
+      setIsLoading(true);
+      const payload = {
+        pageIndex,
+        pageSize,
+        searchString,
+      };
+
+      const { statusCode, data, totalRecords } = await postApi(
+        GET_MEDICAL_SHIPPERS,
+        payload
+      );
+
+      if (statusCode === 200 && Array.isArray(data)) {
+        setShippers(data);
+        setTotal(totalRecords || data.length || 0);
+      } else {
+        setShippers([]);
+        setTotal(0);
+      }
+    } catch (err) {
+      console.error("GET_MEDICAL_SHIPPERS error:", err);
+      errorToast("Failed to load shippers");
+      setShippers([]);
+      setTotal(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMedicalShippers();
+  }, [open, pageIndex, pageSize, searchString]);
+
   const filtered = useMemo(() => {
-    return MOCK_SHIPPERS.filter((s) => {
-      const byName = s.name.toLowerCase().includes(keyword.trim().toLowerCase());
-      const byLoc = loc ? true /* demo: all items same loc */ : true;
-      return byName && byLoc;
+    return shippers.filter((s) => {
+      if (!loc) return true;
+      const fullLoc = buildLocation(s).toLowerCase();
+      return fullLoc.includes(String(loc).toLowerCase());
     });
-  }, [keyword, loc]);
+  }, [shippers, loc]);
 
   const handleAssign = async (shipper) => {
-    if (assigningId) return;
-    // try {
-    //   setAssigningId(shipper.id);
-    //   // payload shape — adjust to your backend
-    //   const payload = {
-    //     patientId: patient?.id,
-    //     shipperId: shipper.id,
-    //     location: loc || "banashankari",
-    //   };
-    //   await postApi(ASSIGN_SHIPPER_TO_PATIENT, payload);
-    //   successToast("Assigned successfully");
-    //   onAssigned?.(shipper);
-    // } catch (e) {
-    //   errorToast(e?.response?.data?.message || "Failed to assign");
-    // } finally {
-    //   setAssigningId(null);
-    // }
+    if (assigningId || !patient?.id) return;
+
+    const payload = {
+      id: patient.id,
+      shipperId: shipper.id,
+    };
+    const { statusCode, message } = await postApi(
+      ASSIGN_SHIPPER_TO_PATIENT,
+      payload
+    );
+    if (statusCode === 200) {
+      successToast("Shipper assigned successfully");
+      onAssigned?.();
+      handleClose();
+    } else {
+      errorToast(message);
+    }
   };
 
   const handleClose = () => {
     setKeyword("");
     setLoc(undefined);
+    setShippers([]);
+    setTotal(0);
+    setSearchString("");
+    setPageIndex(0);
     onClose?.();
   };
 
@@ -63,7 +126,7 @@ const AssignShipperModal = ({ open, onClose, onAssigned, patient }) => {
     <CustomModal
       open={open}
       onClose={handleClose}
-      title="Subscription"
+      title="Assign Shipper"
       showPrimary={false}
       showDanger={false}
       width={760}
@@ -73,55 +136,73 @@ const AssignShipperModal = ({ open, onClose, onAssigned, patient }) => {
       <div className="as__label">Select Shipper to Assign</div>
 
       <div className="as__filters">
-        <InputField
-          title=""
-          name="keyword"
-          placeholder="Search by name..."
+        <SearchInput
           value={keyword}
+          placeholder="Search by name"
           onChange={(e) => setKeyword(e.target.value)}
+          onDebouncedChange={(val) => {
+            const trimmed = val.trim();
+            setKeyword(trimmed);
+            setPageIndex(0);
+            setSearchString(trimmed);
+          }}
         />
         <SelectInput
           title=""
           name="location"
-          placeholder="Select Location"
+          placeholder="Filter by Location"
           value={loc}
           onChange={(v) => setLoc(v)}
           options={LOCATIONS}
           allowClear
         />
-        <button type="button" className="as__searchBtn" onClick={() => { /* optional if server search */ }}>
-          Search
-        </button>
       </div>
 
       <div className="as__divider" />
 
       <div className="as__resultsLabel">
-        Search Results ({filtered.length})
+        Search Results ({filtered.length}
+        {total ? ` of ${total}` : ""})
       </div>
 
       <div className="as__list">
-        {filtered.map((s) => (
-          <div key={s.id} className="as__item">
-            <div className="as__left">
-              <img className="as__avatar" src={s.avatar} alt={s.name} />
-              <div>
-                <div className="as__name">{s.name}</div>
-                <div className="as__muted">
-                  <span className="as__loctag">Location :</span>&nbsp;{s.location}
+        {!isLoading && filtered.length === 0 && (
+          <div className="as__empty">No shippers found.</div>
+        )}
+
+        {filtered.map((s) => {
+          const location = buildLocation(s);
+          const initials = s.name
+            ?.split(" ")
+            .map((p) => p[0])
+            .join("")
+            .toUpperCase();
+
+          return (
+            <div key={s.id} className="as__item">
+              <div className="as__left">
+                <div className="as__avatarFallback">{initials || "S"}</div>
+                <div>
+                  <div className="as__name">{s.name}</div>
+                  <div className="as__muted">
+                    <span className="as__loctag">Location :</span>&nbsp;
+                    {location || "-"}
+                  </div>
                 </div>
               </div>
+              <button
+                type="button"
+                className="as__assignBtn"
+                onClick={() => handleAssign(s)}
+                disabled={assigningId === s.id}
+              >
+                {assigningId === s.id ? "Assigning..." : "Assign"}
+              </button>
             </div>
-            <button
-              type="button"
-              className="as__assignBtn"
-              onClick={() => handleAssign(s)}
-              disabled={assigningId === s.id}
-            >
-              {assigningId === s.id ? "Assigning..." : "Assign"}
-            </button>
-          </div>
-        ))}
+          );
+        })}
+
+        {isLoading && <Loader />}
       </div>
     </CustomModal>
   );

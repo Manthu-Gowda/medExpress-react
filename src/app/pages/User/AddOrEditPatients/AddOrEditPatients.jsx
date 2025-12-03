@@ -94,6 +94,7 @@ const getCountryRule = (code = "+1") =>
 
 const digitsOnly = (s = "") => String(s).replace(/\D+/g, "");
 
+const MIN_ZIP_CHARS = 3;
 const AddOrEditPatients = () => {
   const { id } = useParams();
   const isEdit = Boolean(id);
@@ -427,7 +428,6 @@ const AddOrEditPatients = () => {
     })();
   }, [isEdit, id]);
 
-  const MIN_ZIP_CHARS = 3;
   const handleZipSearch = (input = "") => {
     const q = String(input).trim();
     if (q.length < MIN_ZIP_CHARS) {

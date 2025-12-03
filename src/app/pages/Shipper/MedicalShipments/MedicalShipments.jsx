@@ -1,28 +1,35 @@
+// src/pages/Admin/AdminPatients/AdminPatients.jsx
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Popover } from "antd";
 import SubHeader from "../../../components/SubHeader/SubHeader";
 import Loader from "../../../components/Loader/Loader";
-import "./ManageUsers.scss";
-import UserViewModal from "./UserViewModal";
-import { GET_MEMBERS_DATA } from "../../../utils/apiPath";
+import "./MedicalShipments.scss";
+import {
+  GET_ALL_ADMIN_PATIENTS,
+  GET_ALL_SHIPPER_PATIENTS,
+} from "../../../utils/apiPath";
 import { postApi } from "../../../utils/apiService";
 import EyeIcon from "../../../assets/icons/EyeIcon";
 import * as XLSX from "xlsx";
 import { formatMMDDYYYY } from "../../../services/dateFormatter";
-import { renderStatusCapsule } from "../../../services/statusCapsule";
 import CustomTable from "../../../components/CustomTable/CustomTable";
+import CustomModal from "../../../components/CustomModal/CustomModal";
+import PatientCard from "../../../components/PatientCard/PatientCard";
+import { useNavigate } from "react-router-dom";
 
 const pad2 = (n) => String(n).padStart(2, "0");
 
-const ManageUsers = () => {
+const MedicalShipments = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [open, setOpen] = useState(false);
-  const [members, setMembers] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [total, setTotal] = useState(0);
+
   const [selectedMember, setSelectedMember] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [searchString, setSearchString] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchMembers();
@@ -30,21 +37,15 @@ const ManageUsers = () => {
 
   const fetchMembers = async () => {
     setIsLoading(true);
-
-    const payload = {
-      pageIndex,
-      pageSize,
-      searchString: searchString,
-      isVerified: true,
-    };
+    const payload = { pageIndex, pageSize, searchString: searchString };
 
     const { statusCode, data, totalRecords } = await postApi(
-      GET_MEMBERS_DATA,
+      GET_ALL_SHIPPER_PATIENTS,
       payload
     );
 
     if (statusCode === 200 && data) {
-      setMembers(data);
+      setPatients(data);
       setTotal(totalRecords);
     }
 
@@ -64,92 +65,93 @@ const ManageUsers = () => {
         pageIndex: 0,
         pageSize: total,
         searchString: "",
-        isVerified: true,
       };
 
-      const { statusCode, data } = await postApi(GET_MEMBERS_DATA, payload);
+      const { statusCode, data } = await postApi(
+        GET_ALL_ADMIN_PATIENTS,
+        payload
+      );
 
       if (statusCode !== 200 || !Array.isArray(data)) {
         setIsLoading(false);
         return;
       }
 
-      // Remove heavy/unwanted fields first
-      const cleanedMembers = data.map(
+      // Remove unwanted fields
+      const cleanedPatients = data.map(
         ({
           id,
-          profilePicture,
           zipCodeId,
           cityId,
           stateId,
           countryId,
-          password,
-          patients,
+          visaType,
           passport,
           visa,
           prescriptions,
-          sendOtp,
           ...rest
         }) => rest
       );
 
-      if (!cleanedMembers.length) {
+      if (!cleanedPatients.length) {
         setIsLoading(false);
         return;
       }
 
-      // Map to export rows with pretty headers and computed values
-      const rows = cleanedMembers.map((item) => ({
-        "User Name": item.userName || "",
-        Email: item.email || item.emailId || "",
+      // Transform rows with pretty header names
+      const rows = cleanedPatients.map((item) => ({
+        "Patient Name": item.name || "",
+        Email: item.email || "",
         "Country Code": item.countryCode || "",
         "Phone Number": item.phoneNumber || "",
+        "Date of Birth": formatMMDDYYYY(item.dateOfBirth),
+        "Visa Type": item.visaTypeName || item.visaType || "",
+        "Visa Expiry Date": formatMMDDYYYY(item.visaExpiryDate),
+        "USA Last Entry Date": formatMMDDYYYY(item.lastEntryDate),
         Address: [item.address1, item.address2].filter(Boolean).join(", "),
         City: item.cityName || "",
         State: item.stateName || "",
         Country: item.countryName || "",
         "Zip Code": item.zipCode || "",
-        "Total Patients":
-          typeof item.totalPatients === "number" ? item.totalPatients : "",
-        Verified:
-          item.isVerified === true || item.isVerified === "TRUE"
-            ? "TRUE"
-            : "FALSE",
-        Active:
-          item.isActive === true || item.isActive === "TRUE" ? "TRUE" : "FALSE",
         "Created Date": formatMMDDYYYY(item.createdDate),
-        "Updated Date": formatMMDDYYYY(item.updatedDate),
+        "Last Updated Date": formatMMDDYYYY(item.updatedDate),
       }));
 
-      // Define header order explicitly
+      // Header order
       const headerOrder = [
-        "User Name",
+        "Patient Name",
         "Email",
         "Country Code",
         "Phone Number",
+        "Date of Birth",
+        "Visa Type",
+        "Visa Expiry Date",
+        "USA Last Entry Date",
         "Address",
         "City",
         "State",
         "Country",
         "Zip Code",
-        "Total Patients",
-        "Verified",
-        "Active",
         "Created Date",
-        "Updated Date",
+        "Last Updated Date",
       ];
 
       const worksheet = XLSX.utils.json_to_sheet(rows, { header: headerOrder });
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Members");
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Patients");
 
-      XLSX.writeFile(workbook, "All User Details.xlsx");
+      XLSX.writeFile(workbook, "All Patients Details.xlsx");
 
       setIsLoading(false);
     } catch (err) {
       console.error("Export all failed:", err);
       setIsLoading(false);
     }
+  };
+
+  const handleCloseDetails = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedMember(null);
   };
 
   const columns = [
@@ -159,15 +161,15 @@ const ManageUsers = () => {
       render: (_, __, index) => pad2(pageIndex * pageSize + index + 1),
     },
     {
-      title: "User Name",
-      dataIndex: "userName",
+      title: "Patient Name",
+      dataIndex: "name",
       ellipsis: true,
     },
     {
       title: "Email",
       dataIndex: "email",
       ellipsis: true,
-      render: (text) => <span className="mm__muted">{text}</span>,
+      render: (text) => <span className="ap__muted">{text}</span>,
     },
     {
       title: "Phone Number",
@@ -182,30 +184,11 @@ const ManageUsers = () => {
         return `${code} ${phone}`.trim();
       },
     },
-
     {
-      title: "Created Date",
-      dataIndex: "createdDate",
+      title: "Date of Birth",
+      dataIndex: "dateOfBirth",
       align: "center",
       render: (value) => formatMMDDYYYY(value),
-    },
-    {
-      title: "Updated date",
-      dataIndex: "updatedDate",
-      align: "center",
-      render: (value) => formatMMDDYYYY(value),
-    },
-    {
-      title: "Total Patients",
-      dataIndex: "totalPatients",
-      align: "center",
-      render: (n) => pad2(n),
-    },
-    {
-      title: "Verified Status",
-      dataIndex: "isVerified",
-      align: "center",
-      render: (value) => renderStatusCapsule(value),
     },
     {
       title: "Action",
@@ -215,10 +198,7 @@ const ManageUsers = () => {
         <button
           type="button"
           className="ap__docBadge ap__viewBtn"
-          onClick={() => {
-            setSelectedMember(record);
-            setOpen(true);
-          }}
+          onClick={() => navigate(`/shipper-patient/${record.id}`)}
         >
           <EyeIcon />
           <span className="ap__docBadgeText">View</span>
@@ -228,33 +208,31 @@ const ManageUsers = () => {
   ];
 
   return (
-    <div className="mm">
+    <div className="ap">
       {isLoading && <Loader />}
 
       <SubHeader
-        title="Manage Users"
+        title="Manage Patients"
         showBack={false}
         showRight={true}
         showPlusIcon={false}
         buttonText="Export All"
         onClick={handleExportAll}
         showSearch={true}
-        searchPlaceholder="Search by name, email, phone..."
-        // optional: keep it controlled if you want to show current text
-        // searchValue={search}
+        searchPlaceholder="Search patients..."
         onSearchDebounced={(val) => {
-          setPageIndex(0);         // reset to first page when searching
+          setPageIndex(0);
           setSearchString(val.trim());
         }}
       />
 
-      <section className="mm_sec">
+      <section className="ap_sec">
         <div className="mm__tableWrapper">
           <CustomTable
             rowKey="id"
             loading={isLoading}
             columns={columns}
-            dataSource={members}
+            dataSource={patients}
             pageIndex={pageIndex}
             pageSize={pageSize}
             total={total}
@@ -263,18 +241,26 @@ const ManageUsers = () => {
               setPageSize(size);
             }}
           />
-          <UserViewModal
-            open={open}
-            onClose={() => {
-              setOpen(false);
-              setSelectedMember(null);
-            }}
-            member={selectedMember}
-          />
         </div>
       </section>
+
+      <CustomModal
+        open={isDetailsModalOpen}
+        title={selectedMember?.name || "Patient Details"}
+        onClose={handleCloseDetails}
+        showPrimary={false}
+        showDanger={true}
+        dangerText="Close"
+        onDanger={handleCloseDetails}
+        width={820}
+        bodyClassName="ap__patientModalBody"
+      >
+        {selectedMember && (
+          <PatientCard data={selectedMember} showEdit={false} />
+        )}
+      </CustomModal>
     </div>
   );
 };
 
-export default ManageUsers;
+export default MedicalShipments;
