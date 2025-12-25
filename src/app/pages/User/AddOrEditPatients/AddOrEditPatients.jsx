@@ -21,6 +21,8 @@ import Loader from "../../../components/Loader/Loader";
 import { errorToast, successToast } from "../../../services/ToastHelper";
 import PhoneField from "../../../components/InputField/PhoneField";
 
+const countryIdUSA = "0b4e5851-7670-462b-9e12-919a60ab2c17";
+
 const VISA_TYPES = [
   { value: 1, label: "A" },
   { value: 2, label: "C" },
@@ -111,7 +113,7 @@ const AddOrEditPatients = () => {
     zipCodeId: undefined,
     stateId: undefined,
     cityId: undefined,
-    countryId: "5f030c51-ae0b-4fd5-8a4c-39f74e63c570",
+    countryId: "0b4e5851-7670-462b-9e12-919a60ab2c17",
     zip: "",
     city: "",
     state: "",
@@ -164,7 +166,7 @@ const AddOrEditPatients = () => {
       zipCodeId: data?.zipCodeId ?? undefined,
       cityId: data?.cityId ?? undefined,
       stateId: data?.stateId ?? undefined,
-      countryId: data?.countryId ?? "5f030c51-ae0b-4fd5-8a4c-39f74e63c570",
+      countryId: data?.countryId ?? "0b4e5851-7670-462b-9e12-919a60ab2c17",
 
       city: data?.cityName ?? "",
       state: data?.stateName ?? "",
@@ -394,6 +396,7 @@ const AddOrEditPatients = () => {
         searchString: q,
         pageIndex: 1,
         pageSize: 20,
+        countryId: countryIdUSA,
       };
       const { statusCode, data } = await postApi(GET_ALL_ZIPCODE, payload);
       const options = statusCode === 200 && Array.isArray(data) ? data : [];

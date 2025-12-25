@@ -12,6 +12,7 @@ import {
 } from "../../../utils/apiPath";
 import { successToast, errorToast } from "../../../services/ToastHelper";
 
+const countryIdIndia = "085a5754-e6e8-4101-896b-325990c03646";
 const initialForm = {
   shipperName: "",
   phone: "",
@@ -26,7 +27,7 @@ const initialForm = {
   state: "",
   cityId: undefined,
   stateId: undefined,
-  countryId: "5f030c51-ae0b-4fd5-8a4c-39f74e63c570", // same as patient, change if needed
+  countryId: countryIdIndia,
 };
 
 const phoneRx = /^[0-9+\-\s()]{8,20}$/i;
@@ -96,6 +97,12 @@ const NewShipperModal = ({ open, onClose, onSubmit }) => {
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(fn, delay);
   };
+  const cancelInFlight = () => {
+    if (cityStateAbortRef.current) {
+      cityStateAbortRef.current.abort();
+      cityStateAbortRef.current = null;
+    }
+  };
 
   const fetchZipCodes = async (query = "") => {
     const q = String(query || "").trim();
@@ -112,6 +119,7 @@ const NewShipperModal = ({ open, onClose, onSubmit }) => {
         searchString: q,
         pageIndex: 1,
         pageSize: 20,
+        countryId: countryIdIndia,
       };
       const { statusCode, data } = await postApi(GET_ALL_ZIPCODE, payload);
       const options = statusCode === 200 && Array.isArray(data) ? data : [];
@@ -126,6 +134,8 @@ const NewShipperModal = ({ open, onClose, onSubmit }) => {
       if (myId === requestIdRef.current) setZipLoading(false);
     }
   };
+
+  useEffect(() => () => cancelInFlight(), []);
 
   const handleZipSearch = (input = "") => {
     const q = String(input).trim();
@@ -344,9 +354,9 @@ const NewShipperModal = ({ open, onClose, onSubmit }) => {
         />
 
         <InputField
-          title="Apartment / Unit Number"
+          title="Area of Locality"
           name="address2"
-          placeholder="Enter apartment / unit number"
+          placeholder="Enter Area of Locality"
           value={form.address2}
           onChange={(e) => setField("address2", e.target.value)}
           errorText={errors.address2}

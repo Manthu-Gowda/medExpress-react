@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Table } from "antd";
+import React, { useEffect, useState } from "react";
 import SubHeader from "../../../components/SubHeader/SubHeader";
 import Loader from "../../../components/Loader/Loader";
 import NewShipperModal from "./NewShipperModal";
@@ -7,9 +6,6 @@ import "./MedicalShippers.scss";
 import { GET_MEDICAL_SHIPPERS } from "../../../utils/apiPath";
 import { postApi } from "../../../utils/apiService";
 import CustomTable from "../../../components/CustomTable/CustomTable";
-import { formatMMDDYYYY } from "../../../services/dateFormatter";
-import { renderStatusCapsule } from "../../../services/statusCapsule";
-import EyeIcon from "../../../assets/icons/EyeIcon";
 
 const pad2 = (n) => String(n).padStart(2, "0");
 
@@ -54,29 +50,6 @@ const MedicalShippers = () => {
       render: (_, __, index) => pad2(pageIndex * pageSize + index + 1),
     },
     {
-      title: "Shipper Name",
-      dataIndex: "name",
-      ellipsis: true,
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      ellipsis: true,
-    },
-    {
-      title: "Phone Number",
-      dataIndex: "phoneNumber",
-      ellipsis: true,
-      render: (_, record) => {
-        const code = record.countryCode ? `${record.countryCode}` : "";
-        const phone = record.phoneNumber || "";
-
-        if (!code && !phone) return "-";
-
-        return `${code} ${phone}`.trim();
-      },
-    },
-    {
       title: "State",
       dataIndex: "stateName",
       ellipsis: true,
@@ -88,20 +61,34 @@ const MedicalShippers = () => {
       ellipsis: true,
       render: (value) => value?.trim() || "-",
     },
-    // {
-    //   title: "Created Date",
-    //   dataIndex: "createdDate",
-    //   width: 150,
-    //   align: "center",
-    //   render: (value) => formatMMDDYYYY(value),
-    // },
-    // {
-    //   title: "Updated date",
-    //   dataIndex: "updatedDate",
-    //   width: 150,
-    //   align: "center",
-    //   render: (value) => formatMMDDYYYY(value),
-    // },
+    {
+      title: "Location",
+      dataIndex: "address1",
+      ellipsis: true,
+      render: (_, record) => {
+        const parts = [record.address1, record.address2]
+          .filter(Boolean)
+          .map((v) => v.trim());
+
+        return parts.length ? parts.join(", ") : "-";
+      },
+    },
+    {
+      title: "Phone Number",
+      dataIndex: "phoneNumber",
+      ellipsis: true,
+      render: (_, record) => {
+        const code = record.countryCode ? `${record.countryCode}` : "";
+        const phone = record.phoneNumber || "";
+        if (!code && !phone) return "-";
+        return `${code} ${phone}`.trim();
+      },
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      ellipsis: true,
+    },
   ];
 
   const handleShipperCreated = (newItem) => {

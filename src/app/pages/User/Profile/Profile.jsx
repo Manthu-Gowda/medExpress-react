@@ -21,6 +21,7 @@ import SelectInput from "../../../components/SelectInput/SelectInput";
 import DummyUser from "../../../assets/SampleUser.jpg";
 import PhoneField from "../../../components/InputField/PhoneField";
 
+const countryIdUSA = "0b4e5851-7670-462b-9e12-919a60ab2c17";
 const PLACEHOLDER_AVATAR = DummyUser;
 
 /** Build a clean 1-line address for the “Location” display */
@@ -92,7 +93,7 @@ const apiToUi = (api) => {
     zipId: zipCodeId,
     cityId,
     stateId,
-    countryId: countryId || "5f030c51-ae0b-4fd5-8a4c-39f74e63c570",
+    countryId: countryId || "0b4e5851-7670-462b-9e12-919a60ab2c17",
     addressLine: "",
   };
 
@@ -129,7 +130,7 @@ const uiToApi = (ui) => {
     zipCodeId: ui.zipId, // <- ID
     cityId: ui.cityId, // <- ID
     stateId: ui.stateId, // <- ID
-    countryId: ui.countryId || "5f030c51-ae0b-4fd5-8a4c-39f74e63c570", // fixed
+    countryId: ui.countryId || "0b4e5851-7670-462b-9e12-919a60ab2c17", // fixed
   };
 };
 
@@ -148,7 +149,7 @@ const Profile = () => {
       zipId: undefined,
       cityId: undefined,
       stateId: undefined,
-      countryId: "5f030c51-ae0b-4fd5-8a4c-39f74e63c570",
+      countryId: "0b4e5851-7670-462b-9e12-919a60ab2c17",
       house: "",
       unit: "",
     }),
@@ -253,6 +254,7 @@ const Profile = () => {
         searchString: q,
         pageIndex: 1,
         pageSize: 20,
+        countryId: countryIdUSA,
       };
       const { statusCode, data } = await postApi(GET_ALL_ZIPCODE, payload);
 
