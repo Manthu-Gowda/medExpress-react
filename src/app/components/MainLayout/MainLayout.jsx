@@ -72,7 +72,7 @@ const MENUS_BY_ROLE = {
     },
     {
       key: "medical-shippers",
-      text: "Manage Medical Shippers",
+      text: "Drop of Locations",
       icon: <MedicalShippersIcon />,
       path: "/medical-shippers",
     },

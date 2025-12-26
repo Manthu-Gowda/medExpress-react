@@ -102,10 +102,10 @@ const MedicalShippers = () => {
       {isLoading && <Loader />}
 
       <SubHeader
-        title="Manage Medical Shippers"
+        title="Drop of Locations"
         showBack={false}
         showRight={true}
-        buttonText="Add New Shipper"
+        buttonText="Add New Location"
         onClick={() => setOpen(true)}
       />
 

@@ -253,7 +253,7 @@ const ShipperProfile = () => {
     try {
       const payload = {
         searchString: q,
-        pageIndex: 1,
+        pageIndex: 0,
         pageSize: 20,
         countryId: countryIdUSA,
       };

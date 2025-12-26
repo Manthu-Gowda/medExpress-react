@@ -117,7 +117,7 @@ const NewShipperModal = ({ open, onClose, onSubmit }) => {
     try {
       const payload = {
         searchString: q,
-        pageIndex: 1,
+        pageIndex: 0,
         pageSize: 20,
         countryId: countryIdIndia,
       };
@@ -234,13 +234,13 @@ const NewShipperModal = ({ open, onClose, onSubmit }) => {
       };
 
       const res = await postApi(CREATE_MEDICAL_SHIPPER, payload);
-      successToast("Shipper added successfully");
+      successToast("New location added successfully");
       onSubmit?.(res?.data || payload);
       resetAll();
       onClose?.();
     } catch (err) {
       const msg =
-        err?.response?.data?.message || err?.message || "Failed to add shipper";
+        err?.response?.data?.message || err?.message || "Failed to add new location";
       errorToast(msg);
     } finally {
       setSaving(false);
@@ -256,7 +256,7 @@ const NewShipperModal = ({ open, onClose, onSubmit }) => {
     <CustomModal
       open={open}
       onClose={handleClose}
-      title="Add New Shipper"
+      title="Add New Location"
       showPrimary
       showDanger
       primaryText="Add"
